@@ -1,0 +1,62 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.output {
+  padding: 0px 15px;
+}
+
+.output-text {
+    font-size:1.2em
+}
+
+.poem-line {
+    margin-bottom: 5px;
+}
+
+
+/* Jay's CSS*/
+
+#style {
+	display: inline-block;
+	width: 50%; 
+	}
+
+#rhymeScheme {
+	display: inline-block;
+	}
+
+#frmt {
+	vertical-align: top;
+	display: inline-block;
+	}
+
+#cwordSlider .slider-selection {
+	background: #BABABA;
+}
+
+#repSlider .slider-selection {
+	background: #BABABA;
+}
+
+#allitSlider .slider-selection {
+	background: #BABABA;
+}
+
+#slantSlider .slider-selection {
+	background: #BABABA;
+}
+
+#wordlenSlider .slider-selection {
+	background: #BABABA;
+}
+
+#Message{
+	text-align: center;
+	color: red;
+	font-size: 20px;
+}

@@ -1,0 +1,10 @@
+# Site settings
+title: Hafez
+email: xingshi@usc.edu
+description: "Generate Topical Poetry"
+baseurl: "http://52.24.230.241/poem/"
+url: "http://52.24.230.241/poem"
+
+# Build settings
+markdown: kramdown
+permalink: pretty

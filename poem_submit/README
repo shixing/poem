@@ -1,0 +1,73 @@
+Contents of this README:
+    
+    [0] INTRODUCTION
+    [1] SYSTEM REQUIREMENT
+    [2] INSTALLATION AND RUN
+    [3] CONTACT
+
+[0] INTRODUCTION
+
+This is the submission from USC/ISI for Dartmouth PoetiX Turing Test competition.
+Our system is called Hafez. Given a topic, It will generate fourteen line poems,
+in iambic pentameter and in "Shakesperean" form.
+
+Credit goes to Marjan Ghazvininejad, Xing Shi, Yejin Choi and Kevin Knight. 
+
+An online demo for our system can be found at: 
+
+http://52.24.230.241/poem/
+
+[1] SYSTEM REQUIREMENT
+ 
+    OS: Ubuntu Linux 14.04
+    Python Version: 2.7
+
+[2] INSTALLATION AND RUN
+
+To generate a poem about "home", type:
+
+$ python RunMe.py home
+
+To generate a poem about topic "civil war", type:
+
+$ python RunMe.py civil war
+
+The Program will print the poem into STDOUT.
+Here is one example: 
+
+$ python RunMe.py civil war
+The silver candle may forever cuddle.
+A river flowing under water icing,
+An endless autumn summer winter struggle,
+Upon an early morning Easter rising.
+
+And mother nature never took control.
+Or ever think of foreign intervention,
+Or maybe any other mortal soul,
+A human body offers no attention.
+
+And not the only one victorious,
+Protected from another civil war.
+An ancient evening old and glorious,
+Perhaps a hundred thousand years or more.
+
+Become an angel by the name of Henry,
+Sing a song about the king of Gentry.
+
+Each time you call RunMe.py with a specific topic, it will
+generate a different poem about that topic. So to generate an
+unlimited number of original sonnets about certain topic, just
+run RunMe.py with that topic unlimited times. 
+
+The estimated time to generate a poem is around 50 seconds on
+a 16 GB RAM, 16 core machine. 
+
+[3] CONTACT INFO:
+
+Any questions please contact:
+
+Marjan Ghazvininejad (ghazvini at isi.edu)
+
+
+
+

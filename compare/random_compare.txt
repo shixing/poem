@@ -1,0 +1,2 @@
+compare1.txt 1.0
+compare2.txt 1.0

@@ -1,0 +1,3 @@
+Trained on song lyric corpus (94,882 songs, 32,412,776 words).
+RNN  (LSTM, 2 layers, 1024 hidden units, 20000 vocabulary size).
+FSA vocabulary size: 14,368 (4833 monosyllable, 9535 multisyllable)
