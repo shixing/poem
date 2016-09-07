@@ -2,6 +2,58 @@
 gmodel="";
 gtopic="";
 
+
+
+function onselect_language(n){
+    // n = 1 English
+    // n = 2 Spanish
+    if (n == 2){
+	$("input[name=nline][value=14]").prop("checked",true);
+	$("input[name=nline]").prop("disabled",true);
+
+	$("input[name=genre][value=lyrical]").prop("checked",true);
+	$("input[name=genre]").prop("disabled",true);
+
+	$("input[name=meter][value=iambic]").prop("checked",true);
+	$("input[name=meter]").prop("disabled",true);
+	
+	$("input[name=format][value=ss]").prop("checked",true);
+	$("input[name=format]").prop("disabled",true);
+
+	$("input[name=encourage_words]").prop("disabled",true);
+	$("input[name=disencourage_words]").prop("disabled",true);
+	
+	$("#cwords").slider().slider("disable");
+	$("#reps").slider().slider("disable");
+	$("#allit").slider().slider("disable");
+	$("#slant").slider().slider("disable");
+	$("#wordlen").slider().slider("disable");
+	
+    } else if (n == 1){
+	$("input[name=nline]").prop("disabled",false);
+
+	$("input[name=genre][value=lyrical]").prop("checked",true);
+	$("input[name=genre]").prop("disabled",true);
+
+	$("input[name=meter][value=iambic]").prop("checked",true);
+	$("input[name=meter]").prop("disabled",true);
+	
+	$("input[name=format][value=ss]").prop("checked",true);
+	$("input[name=format]").prop("disabled",true);
+
+	$("input[name=encourage_words]").prop("disabled",false);
+	$("input[name=disencourage_words]").prop("disabled",false);
+	
+	$("#cwords").slider().slider("enable");
+	$("#reps").slider().slider("enable");
+	$("#allit").slider().slider("enable");
+	$("#slant").slider().slider("enable");
+	$("#wordlen").slider().slider("enable");
+	
+    }
+}
+
+
 $('#translate-button').click(function() {
     var btn = $(this);
     btn.button('loading');
@@ -86,6 +138,7 @@ $('#translate-button').click(function() {
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
+	    $("#exact-rhyme-candidates").html(jd.exact_rhyme_candidates);
 	    $("#pc").html(jd.pc);
 	    $("#status").html("Ready");
 	}
@@ -96,3 +149,5 @@ $('#translate-button').click(function() {
 
 
 });
+
+onselect_language(1);

@@ -1,4 +1,4 @@
-var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words and beam size by clicking \"Confirm\"","Rhyme words and beam size are confirmed. Let's start !"]
+var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words and beam size are confirmed. Let's start !"]
 
 //global id;
 var gid = 0;

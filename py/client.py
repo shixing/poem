@@ -245,6 +245,24 @@ def tokenize(words):
     words = [x.lower() for x in words]
     return words
 
+def to_table_html_2(tables):
+    html = "<table class=\"table table-bordered\">"
+    titles = ["Rhyme Type", "Candidates"]
+    html += "<thead><tr>{}</tr></thead>".format(
+        " ".join(["<th>{}</th>".format(x) for x in titles]))
+
+    html += "<tbody>"
+    for line in tables:
+        temp_ll = line.split()
+        ll = [temp_ll[0][:-1], " ".join(temp_ll[1:])]
+        html += "<tr>{}</tr>".format(" ".join(["<td>{}</td>".format(x)
+                                     for x in ll]))
+
+    html += "</tbody>"
+    html += "</table>"
+    return html
+
+
 
 def to_table_html(tables):
     html = "<table class=\"table table-bordered\">"
@@ -267,22 +285,36 @@ def to_table_html(tables):
 def get_rhyme(fn):
     f = open(fn)
     words = []
+    exact_rhyme_candidate = []
     tables = []
-    while True:
-        line = f.readline()
-        if line.strip() == "":
-            break
-        words.append(line.strip())
-    f.readline()
-    f.readline()
-    while True:
-        line = f.readline()
-        if not line:
-            break
-        tables.append(line.strip())
 
+    while True:
+        title = f.readline()
+        if not title:
+            break
+        content = []
+        while True:
+            line = f.readline()
+            if line.strip() == "":
+                break
+            content.append(line)
+
+        print title, len(content)
+        if title.startswith('##Rhyme Words'):
+            for line in content:
+                words.append(line.strip())
+        
+        if title.startswith("##Exact Rhyme Candidates"):
+            for line in content:
+                exact_rhyme_candidate.append(line.strip())
+        
+        if title.startswith("##Rhyme info"):
+            for line in content:
+                tables.append(line.strip())
+        
+    rhyme_table_html = to_table_html_2(exact_rhyme_candidate)
     table_html = to_table_html(tables)
-    return words, table_html
+    return words, (table_html,rhyme_table_html)
 
 
 def process_topic(topic):
@@ -382,7 +414,7 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None):
         sm.clear_status(index)
         os.remove(rhyme_path)
 
-        return [], [], rhyme_words, table_html
+        return [], [], rhyme_words, table_html, rhyme_table_html
     
     cmd = ["bash", "run.sh", topic, fsa_path, source_path, rhyme_path, encourage_path]
     if nline != None:
@@ -522,7 +554,8 @@ class POEM(Resource):
         d['poem'] = poem_str
         d['config'] = config_str
         d['rhyme_words'] = rhyme_words_html
-        d['rhyme_info'] = table_html
+        d['rhyme_info'] = table_html[0]
+        d['exact_rhyme_candidates'] = table_html[1]
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
 
@@ -923,7 +956,8 @@ class POEM_check(Resource):
         d['poem'] = poem_str
         d['config'] = config_str
         d['rhyme_words'] = rhyme_words_html
-        d['rhyme_info'] = table_html
+        d['rhyme_info'] = table_html[0]
+        d['exact_rhyme_candidates'] = table_html[1]
         d['pc'] = phrase_str
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
