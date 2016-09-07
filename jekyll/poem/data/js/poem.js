@@ -139,6 +139,7 @@ $('#translate-button').click(function() {
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
 	    $("#exact-rhyme-candidates").html(jd.exact_rhyme_candidates);
+	    $("#slant-rhyme-candidates").html(jd.slant_rhyme_candidates);
 	    $("#pc").html(jd.pc);
 	    $("#status").html("Ready");
 	}

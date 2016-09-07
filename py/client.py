@@ -287,6 +287,7 @@ def get_rhyme(fn):
     words = []
     exact_rhyme_candidate = []
     tables = []
+    slant_rhymes = []
 
     while True:
         title = f.readline()
@@ -299,7 +300,11 @@ def get_rhyme(fn):
                 break
             content.append(line)
 
-        print title, len(content)
+        if title.startswith("##Slant Rhyme Candidates"):
+            for line in content:
+                slant_rhymes.append(line.strip())
+        
+        
         if title.startswith('##Rhyme Words'):
             for line in content:
                 words.append(line.strip())
@@ -314,7 +319,7 @@ def get_rhyme(fn):
         
     rhyme_table_html = to_table_html_2(exact_rhyme_candidate)
     table_html = to_table_html(tables)
-    return words, (table_html,rhyme_table_html)
+    return words, (table_html,rhyme_table_html,slant_rhymes)
 
 
 def process_topic(topic):
@@ -958,6 +963,7 @@ class POEM_check(Resource):
         d['rhyme_words'] = rhyme_words_html
         d['rhyme_info'] = table_html[0]
         d['exact_rhyme_candidates'] = table_html[1]
+        d['slant_rhyme_candidates'] = "<br//>".join(table_html[2])
         d['pc'] = phrase_str
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
