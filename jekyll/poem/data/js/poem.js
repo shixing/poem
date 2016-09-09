@@ -9,46 +9,70 @@ function onselect_language(n){
     // n = 2 Spanish
     if (n == 2){
 	$("input[name=nline][value=14]").prop("checked",true);
+	$("input[name=nline][value!=14]").parent().css('color','lightgrey');
 	$("input[name=nline]").prop("disabled",true);
 
 	$("input[name=genre][value=lyrical]").prop("checked",true);
+	$("input[name=genre][value!=lyrical]").parent().css('color','lightgrey');
 	$("input[name=genre]").prop("disabled",true);
 
 	$("input[name=meter][value=iambic]").prop("checked",true);
+	$("input[name=meter][value!=iambic]").parent().css('color','lightgrey');
 	$("input[name=meter]").prop("disabled",true);
 	
 	$("input[name=format][value=ss]").prop("checked",true);
+	$("input[name=format][value!=ss]").parent().css('color','lightgrey');
 	$("input[name=format]").prop("disabled",true);
 
 	$("input[name=encourage_words]").prop("disabled",true);
 	$("input[name=disencourage_words]").prop("disabled",true);
 	
+	$("#enc").slider().slider("disable");
 	$("#cwords").slider().slider("disable");
 	$("#reps").slider().slider("disable");
 	$("#allit").slider().slider("disable");
 	$("#slant").slider().slider("disable");
 	$("#wordlen").slider().slider("disable");
-	
+	$("#enc_weight").prop('disabled',true);
+	$("#cword_weight").prop('disabled',true);
+	$("#reps_weight").prop('disabled',true);
+	$("#allit_weight").prop('disabled',true);
+	$("#slant_weight").prop('disabled',true);
+	$("#wordlen_weight").prop('disabled',true);
+		
+
     } else if (n == 1){
 	$("input[name=nline]").prop("disabled",false);
+	$("input[name=nline]").parent().css('color','black');
 
 	$("input[name=genre][value=lyrical]").prop("checked",true);
+	$("input[name=genre][value!=lyrical]").parent().css('color','lightgrey');
 	$("input[name=genre]").prop("disabled",true);
 
 	$("input[name=meter][value=iambic]").prop("checked",true);
+	$("input[name=meter][value!=iambic]").parent().css('color','lightgrey');
 	$("input[name=meter]").prop("disabled",true);
 	
 	$("input[name=format][value=ss]").prop("checked",true);
+	$("input[name=format][value!=ss]").parent().css('color','lightgrey');
 	$("input[name=format]").prop("disabled",true);
 
 	$("input[name=encourage_words]").prop("disabled",false);
 	$("input[name=disencourage_words]").prop("disabled",false);
 	
+	$("#enc").slider().slider("enable");	
 	$("#cwords").slider().slider("enable");
 	$("#reps").slider().slider("enable");
 	$("#allit").slider().slider("enable");
 	$("#slant").slider().slider("enable");
 	$("#wordlen").slider().slider("enable");
+	$("#enc_weight").prop('disabled',false);
+	$("#cword_weight").prop('disabled',false);
+	$("#reps_weight").prop('disabled',false);
+	$("#allit_weight").prop('disabled',false);
+	$("#slant_weight").prop('disabled',false);
+	$("#wordlen_weight").prop('disabled',false);
+
 	
     }
 }
@@ -62,6 +86,8 @@ $('#translate-button').click(function() {
     $("#rhyme-info").html("");
     $("#rhyme-words").html("");
     $("#pc").html("");
+    $("#exact-rhyme-candidates").html("");
+    $("#slant-rhyme-candidates").html("");
 
     var lang = $("input[name=model]:checked").val();
 
@@ -86,6 +112,44 @@ $('#translate-button').click(function() {
     id = Math.round(Math.random()*1000) + 1
     gmodel = model;
     gtopic = topic;
+
+    //style
+    var encourage_words = $('input[name=encourage_words]').val();
+    var disencourage_words = $('input[name=disencourage_words]').val();
+    var enc_weight = $('input[name=enc_weight]').val();
+    var cword = $('input[name=cword_weight]').val();
+    var reps = $('input[name=reps_weight]').val();
+    var allit = $('input[name=allit_weight]').val();
+    var slant = $('input[name=slant_weight]').val();
+    var wordlen = $('input[name=wordlen_weight]').val();
+
+    eng_data = {
+	    topic:topic,
+	    k:1,
+	    model:model,
+	    id:id,
+	    nline:nline,
+	    encourage_words:encourage_words,
+	    disencourage_words:disencourage_words,
+	    enc_weight:enc_weight,
+	    cword:cword,
+	    reps:reps,
+	    allit:allit,
+	    slant:slant,
+	    wordlen:wordlen
+	};
+    spa_data = {
+	    topic:topic,
+	    k:1,
+	    model:model,
+	    id:id,
+	    nline:nline,
+	};
+    data = eng_data;
+    if (port ==1 ) // spanish
+    {
+	data = eng_data;
+    }
 
     left_time = 40;
     if (lang == 1){
@@ -116,13 +180,7 @@ $('#translate-button').click(function() {
 
     $.ajax({
 	url: "http://cage.isi.edu:"+port+"/api/poem_check",
-	data: {
-	    topic:topic,
-	    k:1,
-	    model:model,
-	    id:id,
-	    nline:nline
-	},
+	data: data,
 	type:"GET",
 	xhrFields: {
 	    // The 'xhrFields' property sets additional fields on the XMLHttpRequest.

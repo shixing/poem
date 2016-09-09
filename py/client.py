@@ -23,6 +23,7 @@ marjan_dir = os.path.join(root_dir, "sonnet-project-for-server/")
 before_path_tp = os.path.join(root_dir, "fsas/before.txt")
 after_path_tp = os.path.join(root_dir, "fsas/after.txt")
 ngram_path = os.path.join(root_dir,"models/5grams.txt")
+curse_path = os.path.join(root_dir,"models/curse.txt")
 
 interactive_folder_tp = os.path.join(root_dir, 'fsas_interactive/data')
 interactive_folder = interactive_folder_tp
@@ -34,6 +35,7 @@ interactive_ports = [10020, 10021]
 
 def load_ngram():
     d = {}
+    #return d
     with open(ngram_path) as f:
         for line in f:
             d[line.strip()] = 1
@@ -388,7 +390,7 @@ def get_poem_compare(topic, c1, c2, index=0):
     return r1, r2
 
 
-def get_poem(k, model_type, topic, index=0, check=False, nline = None):
+def get_poem(k, model_type, topic, index=0, check=False, nline = None, style = None):
     # return times, poems, rhyme_words, rhyme_info_html.
 
 
@@ -436,15 +438,72 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None):
     port = ports[model_type]
     data = ""
 
+
+    
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     if model_type <= 2:  # translation
+        message = "k:{} source_file:{} fsa_file:{}".format(k,source_path,fsa_path)
+        #s.send("{} {} {} {} {}\n".format(k, source_path, fsa_path, encourage_path, 1.0))
+        
+        encourage_files = [encourage_path]
+        encourage_weights = [1.0]
+        args = style
+        if args != None:
+            print "Here"
+            if "encourage_words" in args:
+                encourage_words = args['encourage_words'].split()
+                if len(encourage_words) > 0:
+                    user_encourage_path = rf(encourage_path_tp+".user")
+                    f =  open(user_encourage_path,'w')
+                    for word in encourage_words:
+                        f.write(word+"\n")
+                    f.flush()
+                    f.close()
+                    encourage_files.append(user_encourage_path)
+                    encourage_weights.append(float(args['enc_weight']))
+                    
+            if "disencourage_words" in args:
+                disencourage_words = args['disencourage_words'].split()
+                if len(disencourage_words) > 0:
+                    user_disencourage_path = rf(encourage_path_tp+".dis.user")
+                    f =  open(user_disencourage_path,'w')
+                    for word in disencourage_words:
+                        f.write(word+"\n")
+                    f.flush()
+                    f.close()
+                    encourage_files.append(user_disencourage_path)
+                    encourage_weights.append(-float(args['enc_weight']))
+                
+            if "cword" in args and args["cword"]:
+                cword = float(args['cword'])
+                encourage_files.append(curse_path)
+                encourage_weights.append(cword)
+                
+            message += " encourage_list_files:{} encourage_weights:{}".format(",".join(encourage_files), ",".join([str(x) for x in encourage_weights]))
+                
+            if "reps" in args and args["reps"]:
+                reps = float(args['reps'])
+                message += " repetition:{}".format(reps)
+            if "allit" in args and args["allit"]:
+                allit = float(args['allit'])
+                message += " alliteration:{}".format(allit)
+            if "slant" in args and args["slant"]:
+                slant = float(args['slant'])
+                # not support now .. 
+            if "wordlen" in args and args["wordlen"]:
+                wordlen = float(args['wordlen'])
+                message += " wordlen:{}".format(wordlen)
+
+
         s.connect((host, port))
-        message = s.recv(1024)
-        print host, port, message
-        assert(message == 'Accept')
+        message_old = s.recv(1024)
+        print host, port, message_old
+        assert(message_old == 'Accept')
         sm.next_status(index)
-        s.send("{} {} {} {} {}\n".format(k, source_path, fsa_path, encourage_path, 1.0))
+
+        sys.stderr.write(message+'\n')
+        s.send(message+"\n")
         data = receive_all(s)
     else:
         s.connect((host, port))
@@ -461,9 +520,9 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None):
     rhyme_words, table_html = get_rhyme(rhyme_path)
     sm.next_status(index)
 
-    os.remove(fsa_path)
-    os.remove(source_path)
-    os.remove(rhyme_path)
+    #os.remove(fsa_path)
+    #os.remove(source_path)
+    #os.remove(rhyme_path)
 
     new_poems = []
     lines = []
@@ -908,8 +967,20 @@ class POEM_check(Resource):
         parser.add_argument('topic')
         parser.add_argument('nline')
         parser.add_argument('id')
+        # style
+        # do not support phrase now;
+        parser.add_argument("encourage_words")
+        parser.add_argument("disencourage_words")
+        parser.add_argument("enc_weight")
+        parser.add_argument('cword')
+        parser.add_argument('reps')
+        parser.add_argument('allit')
+        parser.add_argument('slant')
+        parser.add_argument('wordlen')
+        
 
         args = parser.parse_args()
+        print args
         k = int(args['k'])
         model_type = int(args['model'])
         topic = args['topic']
@@ -925,7 +996,8 @@ class POEM_check(Resource):
         if not (nline == 2 or nline == 4 or nline == 14):
             nline = 14
 
-
+        # parse the style parameters
+        
 
         assert(k > 0)
         assert(model_type == 0 or model_type ==
@@ -934,7 +1006,7 @@ class POEM_check(Resource):
 
         print model_type, k, topic
         times, poems, rhyme_words, table_html,lines = get_poem(
-            k, model_type, topic, index, check=True, nline = nline)
+            k, model_type, topic, index, check=True, nline = nline, style = args)
         
         
         # log it

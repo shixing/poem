@@ -132,18 +132,27 @@
       <b>Vocabulary</b>
     </div>
 
-    <div class="col-lg-3">
+    <div class="col-lg-2">
       <div class="input-group">
 	<input type="text" name="encourage_words" class="form-control" placeholder="Encourage words">
       </div>
     </div>
 
-    <div class="col-lg-3">
+    <div class="col-lg-2">
       <div class="input-group">
 	<input type="text" name = "disencourage_words" class="form-control" placeholder="disencourage words">
       </div>
     </div>
-
+    <div class="col-lg-2">
+	<input id="enc" data-slider-id='cwordSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="-2" data-slider-tooltip="hide"/>     
+      </div>
+    <div class="col-lg-1">
+      <div class="input-group input-group-sm">
+	<input type="text" id = "enc_weight" name="enc_weight" class="form-control" placeholder="0.0">
+      </div>
+    </div>
+    
+    
   </div> <!-- row -->
 
   <!-- Style -->
@@ -152,31 +161,47 @@
       <b>Style</b>
     </div>
 
-    <div class="col-lg-2">
+    <div class="col-lg-3">
       <div class="col-lg-12">
 	<span>curse words</span>
       </div>
-      <div class="col-lg-12">
-	<input id="cwords" data-slider-id='cwordSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="1" data-slider-value="0"/>     
+      <div class="col-lg-8">
+	<input id="cwords" data-slider-id='cwordSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4">
+	<div class="input-group input-group-sm">
+	  <input id = "cword_weight" type="text" name="cword_weight" class="form-control" placeholder="0.0">
+	</div>
       </div>
     </div>
 
-    <div class="col-lg-2">
+    <div class="col-lg-3">
       <div class="col-lg-12">
 	<span>repetition</span>
       </div>
-      <div class="col-lg-12">
-	<input id="reps" data-slider-id='repSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="1" data-slider-value="0"/>     
+      <div class="col-lg-8">
+	<input id="reps" data-slider-id='repSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4">
+	<div class="input-group input-group-sm">
+	  <input id = "reps_weight" type="text" name="reps_weight" class="form-control" placeholder="0.0">
+	</div>
       </div>
     </div>
 
-    <div class="col-lg-2">
+    <div class="col-lg-3">
       <div class="col-lg-12">
 	<span>alliteration</span>
       </div>
-      <div class="col-lg-12">
-	<input id="allit" data-slider-id='allitSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="1" data-slider-value="0"/>     
+      <div class="col-lg-8">
+	<input id="allit" data-slider-id='allitSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
       </div>
+      <div class="col-lg-4">
+	<div class="input-group input-group-sm">
+	  <input type="text" id = "allit_weight" name="allit_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+
     </div>
 
     
@@ -187,25 +212,35 @@
     <div class="col-lg-1">
     </div>
 
-    <div class="col-lg-2">
+    <div class="col-lg-3">
       <div class="col-lg-12">
 	<span>slant rhyme</span>
       </div>
-      <div class="col-lg-12">
-	<input id="slant" data-slider-id='slantSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="1" data-slider-value="0"/>     
+      <div class="col-lg-8">
+	<input id="slant" data-slider-id='slantSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
       </div>
+      <div class="col-lg-4">
+	<div class="input-group input-group-sm">
+	  <input id = "slant_weight" type="text" name="slant_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+
     </div>
 
-    <div class="col-lg-2">
+    <div class="col-lg-3">
       <div class="col-lg-12">
 	<span>word length</span>
       </div>
-      <div class="col-lg-12">
-	<input id="wordlen" data-slider-id='wordlenSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="1" data-slider-value="0"/>     
+      <div class="col-lg-8">
+	<input id="wordlen" data-slider-id='wordlenSlider' type="text" data-slider-min="-3" data-slider-max="3" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
       </div>
-    </div>
+      <div class="col-lg-4">
+	<div class="input-group input-group-sm">
+	  <input id = "wordlen_weight" type="text" name="wordlen_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
 
-   
+    </div>
   </div>
 
 </div>

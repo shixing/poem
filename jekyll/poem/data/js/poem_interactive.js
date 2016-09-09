@@ -50,7 +50,7 @@ function display_btn(index){
 }
 
 function disable_model(disable){
-    $('input[name=model]').attr("disabled",disable);
+    //$('input[name=model]').attr("disabled",disable);
 }
 
 function clear_line_rhyme(){
@@ -205,7 +205,8 @@ function forward(index){
     var btn = $("#forward_btn"+index.toString());
     btn.button('loading');
 
-    model = $("input[name=model]:checked").val();
+    //model = $("input[name=model]:checked").val();
+    model = 0;
     action = "fsaline";
 
     id = gid;
@@ -256,7 +257,8 @@ function fast_forward(index){
     var btn = $("#fast_forward_btn"+index.toString());
     btn.button('loading');
 
-    model = $("input[name=model]:checked").val();
+    //model = $("input[name=model]:checked").val();
+    model = 0;
     action = "fsa";
 
     id = gid;
@@ -310,7 +312,8 @@ function upload(index){
     var btn = $("#upload_btn"+index.toString());
     btn.button('loading');
 
-    model = $("input[name=model]:checked").val();
+    //model = $("input[name=model]:checked").val();
+    model = 0;
     action = "words";
 
     id = gid;
