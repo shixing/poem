@@ -452,7 +452,7 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, style = N
         if args != None:
             print "Here"
             if "encourage_words" in args:
-                encourage_words = args['encourage_words'].split()
+                encourage_words = args['encourage_words'].lower().split()
                 if len(encourage_words) > 0:
                     user_encourage_path = rf(encourage_path_tp+".user")
                     f =  open(user_encourage_path,'w')
@@ -464,7 +464,7 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, style = N
                     encourage_weights.append(float(args['enc_weight']))
                     
             if "disencourage_words" in args:
-                disencourage_words = args['disencourage_words'].split()
+                disencourage_words = args['disencourage_words'].lower().split()
                 if len(disencourage_words) > 0:
                     user_disencourage_path = rf(encourage_path_tp+".dis.user")
                     f =  open(user_disencourage_path,'w')

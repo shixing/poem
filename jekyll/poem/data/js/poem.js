@@ -64,13 +64,13 @@ function onselect_language(n){
 	$("#cwords").slider().slider("enable");
 	$("#reps").slider().slider("enable");
 	$("#allit").slider().slider("enable");
-	$("#slant").slider().slider("enable");
+	$("#slant").slider().slider("disable");
 	$("#wordlen").slider().slider("enable");
 	$("#enc_weight").prop('disabled',false);
 	$("#cword_weight").prop('disabled',false);
 	$("#reps_weight").prop('disabled',false);
 	$("#allit_weight").prop('disabled',false);
-	$("#slant_weight").prop('disabled',false);
+	$("#slant_weight").prop('disabled',true);
 	$("#wordlen_weight").prop('disabled',false);
 
 	
