@@ -390,11 +390,12 @@ def get_poem_compare(topic, c1, c2, index=0):
     return r1, r2
 
 
-def get_poem(k, model_type, topic, index=0, check=False, nline = None, style = None):
+def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=False, style = None):
     # return times, poems, rhyme_words, rhyme_info_html.
 
-
     r = random.randint(1, 100000)
+    if index!=0:
+        r = index
 
     def rf(path):
         return '{}.{}'.format(path, r)
@@ -423,16 +424,20 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, style = N
 
         return [], [], rhyme_words, table_html, rhyme_table_html
     
-    cmd = ["bash", "run.sh", topic, fsa_path, source_path, rhyme_path, encourage_path]
-    if nline != None:
-        cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, rhyme_path, encourage_path, str(nline)]
-    print cmd
-    sys.stderr.write("generating fsa!\n")
-    sm.next_status(index)
+    if not no_fsa:
+        cmd = ["bash", "run.sh", topic, fsa_path, source_path, rhyme_path, encourage_path]
+        if nline != None:
+            cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, rhyme_path, encourage_path, str(nline)]
+        print cmd
+        sys.stderr.write("generating fsa!\n")
+        sm.next_status(index)
 
-    sp.call(cmd, cwd=marjan_dir)
+        sp.call(cmd, cwd=marjan_dir)
 
-    sys.stderr.write("fsa generated! start decoding!\n")
+        sys.stderr.write("fsa generated! start decoding!\n")
+    else:
+        sm.next_status(index)
+
     sm.next_status(index)
 
     port = ports[model_type]
@@ -978,6 +983,9 @@ class POEM_check(Resource):
         parser.add_argument('slant')
         parser.add_argument('wordlen')
         
+        # no_fsa
+        parser.add_argument('no_fsa')
+        
 
         args = parser.parse_args()
         print args
@@ -996,7 +1004,10 @@ class POEM_check(Resource):
         if not (nline == 2 or nline == 4 or nline == 14):
             nline = 14
 
-        # parse the style parameters
+        # no_fsa
+        no_fsa = False
+        if "no_fsa" in args and args['no_fsa'] == "1":
+            no_fsa = True
         
 
         assert(k > 0)
@@ -1006,7 +1017,7 @@ class POEM_check(Resource):
 
         print model_type, k, topic
         times, poems, rhyme_words, table_html,lines = get_poem(
-            k, model_type, topic, index, check=True, nline = nline, style = args)
+            k, model_type, topic, index, check=True, nline = nline, no_fsa = no_fsa, style = args)
         
         
         # log it

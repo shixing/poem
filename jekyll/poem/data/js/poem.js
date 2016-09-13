@@ -1,12 +1,28 @@
 // the translate button
 gmodel="";
 gtopic="";
+previous_topic="";
+previous_id=-1;
+previous_nline = -1;
+previous_lang = -1;
 
-
+function to_disable_adjust(){
+    var nline = $("input[name=nline]:checked").val();
+    var lang = $("input[name=model]:checked").val();
+    if ((nline != previous_nline) || (lang != previous_lang)){
+	$("#adjust-button").prop('disabled',true);
+    } else {
+	$("#adjust-button").prop('disabled',false);
+    }
+    if (lang == 1){
+	$("#adjust-button").prop('disabled',true);
+    }
+}
 
 function onselect_language(n){
     // n = 1 English
     // n = 2 Spanish
+    to_disable_adjust()
     if (n == 2){
 	$("input[name=nline][value=14]").prop("checked",true);
 	$("input[name=nline][value!=14]").parent().css('color','lightgrey');
@@ -78,8 +94,100 @@ function onselect_language(n){
 }
 
 
+$('#adjust-button').click(function() {
+    var btn = $(this);
+    $("#translate-button").prop('disabled',true);
+    btn.button('loading');
+    $("#poem").html("");
+
+    lang = previous_lang;
+    nline = previous_nline;
+    id = previous_id;
+    
+    //style
+    var encourage_words = $('input[name=encourage_words]').val();
+    var disencourage_words = $('input[name=disencourage_words]').val();
+    var enc_weight = $('input[name=enc_weight]').val();
+    var cword = $('input[name=cword_weight]').val();
+    var reps = $('input[name=reps_weight]').val();
+    var allit = $('input[name=allit_weight]').val();
+    var slant = $('input[name=slant_weight]').val();
+    var wordlen = $('input[name=wordlen_weight]').val();
+
+    eng_data = {
+	topic:"repeat",
+	k:1,
+	model:"0",
+	id:id,
+	nline:nline,
+	encourage_words:encourage_words,
+	disencourage_words:disencourage_words,
+	enc_weight:enc_weight,
+	cword:cword,
+	reps:reps,
+	allit:allit,
+	slant:slant,
+	wordlen:wordlen,
+	no_fsa:1
+    };
+
+    data = eng_data;
+
+    left_time = 16;
+
+    if (nline == "2"){
+	left_time = 4;
+    } else if (nline == "4") {
+	left_time = 6;
+    }
+    
+    estimation = ""
+    var timer = setInterval( function() {
+	estimation = "["+left_time + "s] "
+	$.ajax(
+	    {
+		url : "http://cage.isi.edu:"+port+"/api/poem_status",
+		data: {id:id},
+		type:"GET",
+		xhrFields:{withCredentials:false},
+		success: function (response_data) {
+		    left_time = left_time - 2
+		    $("#status").html(estimation + response_data);
+		}
+	    }
+	);
+    },2000)
+
+    $.ajax({
+	url: "http://cage.isi.edu:"+port+"/api/poem_check",
+	data: data,
+	type:"GET",
+	xhrFields: {
+	    // The 'xhrFields' property sets additional fields on the XMLHttpRequest.
+	    // This can be used to set the 'withCredentials' property.
+	    // Set the value to 'true' if you'd like to pass cookies to the server.
+	    // If this is enabled, your server must respond with the header
+	    // 'Access-Control-Allow-Credentials: true'.
+	    withCredentials: false
+	},
+	success: function(response_data) {
+	    $("#translate-button").prop('disabled',false);
+	    jd = $.parseJSON(response_data);
+	    $("#poem").html(jd.poem);
+	    $("#status").html("Ready");
+	}
+    }).always(function (){
+	$("#translate-button").prop('disabled',false);
+	btn.button('reset');
+	clearInterval(timer);
+    });
+
+});
+
+
 $('#translate-button').click(function() {
     var btn = $(this);
+    $("#adjust-button").prop('disabled',true);
     btn.button('loading');
     $("#poem").html("");
     $("#config").html("");
@@ -109,9 +217,14 @@ $('#translate-button').click(function() {
 	}
     }
 
-    id = Math.round(Math.random()*1000) + 1
+    id = Math.round(Math.random()*10000) + 1
     gmodel = model;
     gtopic = topic;
+
+
+
+
+
 
     //style
     var encourage_words = $('input[name=encourage_words]').val();
@@ -191,7 +304,12 @@ $('#translate-button').click(function() {
 	    withCredentials: false
 	},
 	success: function(response_data) {
-	    jd = $.parseJSON(response_data)
+	    previous_id = id;
+	    previous_nline = nline;
+	    previous_lang = lang;
+	    $("#adjust-button").prop('disabled',false);
+
+	    jd = $.parseJSON(response_data);
 	    $("#poem").html(jd.poem);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);

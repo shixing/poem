@@ -37,13 +37,13 @@
       {% else %}
       <div class="input-group">
 	<div class="radio-inline">
-	  <label><input type="radio" name="nline" value="2" >2 lines </label>
+	  <label><input type="radio" name="nline" value="2" onclick="to_disable_adjust()">2 lines </label>
 	</div>
 	<div class="radio-inline">
-	  <label><input type="radio" name="nline" value ="4">4 lines</label>
+	  <label><input type="radio" name="nline" value ="4" onclick="to_disable_adjust()">4 lines</label>
 	</div>
 	<div class="radio-inline">
-	  <label><input type="radio" name="nline" value ="14" checked="checked">14 lines</label>
+	  <label><input type="radio" name="nline" value ="14" checked="checked" onclick="to_disable_adjust()">14 lines</label>
 	</div>
       </div>
       {% endif %}
@@ -239,8 +239,8 @@
 	  <input id = "wordlen_weight" type="text" name="wordlen_weight" class="form-control" placeholder="0.0">
 	</div>
       </div>
+    </div>    
 
-    </div>
   </div>
 
 </div>
