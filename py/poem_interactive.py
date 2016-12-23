@@ -85,7 +85,7 @@ def start_server_thread(port,model,bs):
 from multiprocessing import Process
 
 p1 = Process(target=start_server_thread, args=(10020,2,50))
-p2 = Process(target=start_server_thread, args=(10021,2,200))
+#p2 = Process(target=start_server_thread, args=(10021,2,200))
 
 
 p1.start()

@@ -390,7 +390,7 @@ def get_poem_compare(topic, c1, c2, index=0):
     return r1, r2
 
 
-def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=False, style = None):
+def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=False, style = None, withRhymeTable=False):
     # return times, poems, rhyme_words, rhyme_info_html.
 
     r = random.randint(1, 100000)
@@ -427,7 +427,10 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
     if not no_fsa:
         cmd = ["bash", "run.sh", topic, fsa_path, source_path, rhyme_path, encourage_path]
         if nline != None:
-            cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, rhyme_path, encourage_path, str(nline)]
+            if withRhymeTable:
+                cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, rhyme_path, encourage_path, str(nline)]
+            else:
+                cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, encourage_path, str(nline)]
         print cmd
         sys.stderr.write("generating fsa!\n")
         sm.next_status(index)
@@ -522,7 +525,10 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
     s.close()
 
     poems, times = process_results(data)
-    rhyme_words, table_html = get_rhyme(rhyme_path)
+    if withRhymeTable:
+        rhyme_words, table_html = get_rhyme(rhyme_path)
+    else:
+        rhyme_words, table_html = "",["","",""]
     sm.next_status(index)
 
     #os.remove(fsa_path)

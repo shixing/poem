@@ -11,9 +11,9 @@ class Server:
         self.port = port
         self.model = model
         self.root_dir = os.path.abspath(__file__ + "/../../")
-        model_names = ["lyrics.lm.nn","normal.lm.nn","lyrics.tl.topdown.nn"]
+        model_names = ["lyrics.lm.nn","normal.lm.nn","lyrics.tl.nn"]
         self.lm = True
-        if self.model == 2:
+        if self.model >= 2:
             self.lm = False
         self.model_path = os.path.join(os.path.join(self.root_dir,'models/'), model_names[self.model])
         self.rnn = os.path.join(self.root_dir,"a.out")
