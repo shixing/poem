@@ -8,6 +8,14 @@
         <script src="{{ '/data/js/poem.js' | prepend: site.baseurl }}"></script>
 {% endif %}
 
+
+{% if page.url == '/advance/'%}
+        <script src="{{ '/data/js/poem_advance.js' | prepend: site.baseurl }}"></script>
+	<script src="{{ '/data/js/poem_menu.js' | prepend: site.baseurl }}"></script>
+
+{% endif %}
+
+
 {% if page.url == '/interactive/' %}
         <script src="{{ '/data/js/poem_interactive.js' | prepend: site.baseurl }}"></script>
         
@@ -19,4 +27,3 @@
 
 {% endif %}
 
-	<script src="{{ '/data/js/poem_menu.js' | prepend: site.baseurl }}"></script>

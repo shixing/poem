@@ -1,9 +1,11 @@
-var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words and beam size are confirmed. Let's start !"]
+api_host = "vivaldi.isi.edu"
+
+var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words are confirmed. Let's start !"]
 
 //global id;
 var gid = 0;
 var total_line = 14;
-nline_onchange(14);
+nline_onchange(4);
 
 function nline_onchange(n){
     total_line = n;
@@ -19,13 +21,13 @@ function nline_onchange(n){
     </div>
     <div id="bs@@" style="display:none">
       <div class="col-lg-1">
-	<button id="forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="forward(@@)" data-toggle="tooltip" data-placement="top" title="Generate this line by Computer"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+	<button id="forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="forward(@@)" data-toggle="tooltip" data-placement="top" title="by computer"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
       </div>
       <div class="col-lg-1">
-	<button id="fast_forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="fast_forward(@@)" data-toggle="tooltip" data-placement="top" title="Generate all the rest lines by Computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+	<button id="fast_forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="fast_forward(@@)" data-toggle="tooltip" data-placement="top" title="all by computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
       </div>
       <div class="col-lg-1">
-	<button id="upload_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="upload(@@)" data-toggle="tooltip" data-placement="top" title="Let human write this line and submit to server"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span></button>
+	<button id="upload_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="upload(@@)" data-toggle="tooltip" data-placement="top" title="by human"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span></button>
       </div>
     </div>
   </div>
@@ -71,6 +73,7 @@ function start_over()
 
 }
 
+
 function confirm_rhyme(){
     var btn = $("#confirm_button");
     //btn.button('loading');
@@ -87,7 +90,7 @@ function confirm_rhyme(){
     var timer = setInterval( function() {
 	$.ajax(
 	    {
-		url : "http://cage.isi.edu:8080/api/poem_status",
+		url : "http://"+api_host+":8080/api/poem_status",
 		data: {id:id},
 		type:"GET",
 		xhrFields:{withCredentials:false},
@@ -99,7 +102,7 @@ function confirm_rhyme(){
     },2000)
 
     $.ajax({
-	url: "http://cage.isi.edu:8080/api/confirm",
+	url: "http://"+api_host+":8080/api/confirm",
 	data: {
 	    words:words_str,
 	    id:id
@@ -156,7 +159,7 @@ function rec_rhyme(){
     var timer = setInterval( function() {
 	$.ajax(
 	    {
-		url : "http://cage.isi.edu:8080/api/poem_status",
+		url : "http://"+api_host+":8080/api/poem_status",
 		data: {id:id},
 		type:"GET",
 		xhrFields:{withCredentials:false},
@@ -168,7 +171,7 @@ function rec_rhyme(){
     },2000)
 
     $.ajax({
-	url: "http://cage.isi.edu:8080/api/rhyme",
+	url: "http://"+api_host+":8080/api/rhyme",
 	data: {
 	    topic:topic,
 	    id:id,
@@ -193,6 +196,18 @@ function rec_rhyme(){
 	    g(1);
 	    $("#confirm_button").prop("disabled",false);
 	    $("#status").html("Ready");
+
+	    //confirm button pressed here
+	    for (var i = 1; i < total_line+1; i++){
+		$("#rhyme"+ i.toString()).prop("disabled",true);
+	    }
+
+	    disable_model(true);
+	    g(2);
+	    display_btn(1);
+	    $("#status").html("Ready");
+
+
 	}
     }).always(function (){
 	btn.button('reset');
@@ -214,7 +229,7 @@ function forward(index){
     var timer = setInterval( function() {
 	$.ajax(
 	    {
-		url : "http://cage.isi.edu:8080/api/poem_status",
+		url : "http://"+api_host+":8080/api/poem_status",
 		data: {id:id},
 		type:"GET",
 		xhrFields:{withCredentials:false},
@@ -226,7 +241,7 @@ function forward(index){
     },2000)
 
     $.ajax({
-	url: "http://cage.isi.edu:8080/api/poem_interactive",
+	url: "http://"+api_host+":8080/api/poem_interactive",
 	data: {
 	    model:model,
 	    action:action,
@@ -266,7 +281,7 @@ function fast_forward(index){
     var timer = setInterval( function() {
 	$.ajax(
 	    {
-		url : "http://cage.isi.edu:8080/api/poem_status",
+		url : "http://"+api_host+":8080/api/poem_status",
 		data: {id:id},
 		type:"GET",
 		xhrFields:{withCredentials:false},
@@ -278,7 +293,7 @@ function fast_forward(index){
     },2000)
 
     $.ajax({
-	url: "http://cage.isi.edu:8080/api/poem_interactive",
+	url: "http://"+api_host+":8080/api/poem_interactive",
 	data: {
 	    model:model,
 	    action:action,
@@ -322,7 +337,7 @@ function upload(index){
     var timer = setInterval( function() {
 	$.ajax(
 	    {
-		url : "http://cage.isi.edu:8080/api/poem_status",
+		url : "http://"+api_host+":8080/api/poem_status",
 		data: {id:id},
 		type:"GET",
 		xhrFields:{withCredentials:false},
@@ -334,7 +349,7 @@ function upload(index){
     },2000);
 
     $.ajax({
-	url: "http://cage.isi.edu:8080/api/poem_interactive",
+	url: "http://"+api_host+":8080/api/poem_interactive",
 	data: {
 	    model:model,
 	    action:action,

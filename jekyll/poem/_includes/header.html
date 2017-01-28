@@ -16,7 +16,14 @@
         <li><a href="{{ '/index.html' | prepend: site.baseurl }}">Auto</a></li>
 	{% endif %}
 
-	{% if page.url == 'interactive' %}
+	{% if page.url == '/advance/' or page.url == '/advance/index.html' %}
+        <li class="active"><a href="{{ '/advance/' | prepend: site.baseurl }}">Advanced</a></li>
+
+	{% else %}
+        <li><a href="{{ '/advance/' | prepend: site.baseurl }}">Advanced</a></li>
+	{% endif %}
+
+	{% if page.url == '/interactive/' or page.url == '/interactive/index.html' %}
         <li class="active"><a href="{{ '/interactive/' | prepend: site.baseurl }}">Interactive</a></li>
 	{% else %}
         <li><a href="{{ '/interactive/' | prepend: site.baseurl }}">Interactive</a></li>

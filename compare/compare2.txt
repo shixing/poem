@@ -1,2 +1,0 @@
-model=1 enhance=0
-model=2 enhance=0

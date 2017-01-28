@@ -3,7 +3,7 @@ title: Hafez
 email: xingshi@usc.edu
 description: "Generate Topical Poetry"
 baseurl: "http://52.24.230.241/poem/"
-fileurl: "file:///Users/xingshi/Workspace/misc/lstm/poem/jekyll/poem/_site/"
+#baseurl: "file:///Users/xingshi/Workspace/misc/lstm/poem/jekyll/poem/_site/"
 url: "http://52.24.230.241/poem/"
 
 # Build settings

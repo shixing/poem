@@ -6,25 +6,25 @@ import subprocess as sp
 
 class Server:
 
-    def __init__(self,port, model = 0, beam_size = 10):
+    def __init__(self,port, model = 0, beam_size = 10, legacy_model = 1):
         self.host = socket.gethostname()
         self.port = port
         self.model = model
         self.root_dir = os.path.abspath(__file__ + "/../../")
-        model_names = ["lyrics.lm.nn","normal.lm.nn","lyrics.tl.topdown.nn"]
-        self.lm = True
-        if self.model == 2:
-            self.lm = False
+        model_names = ["lyrics.tl.topdown.nn"]
+        self.lm = False
+
         self.model_path = os.path.join(os.path.join(self.root_dir,'models/'), model_names[self.model])
-        self.rnn = os.path.join(self.root_dir,"a.out")
-        self.fsa_path = "fsa_path"
-        self.source_path = "source_path"
+        self.kbest_path = os.path.join(self.root_dir,"run/kbest{}.txt".format(self.port))
+        self.run_dir = os.path.join(self.root_dir,"run/")
+        self.rnn = os.path.join(self.root_dir,"exec/ZOPH_RNN_GPU_EXPAND")
+        self.fsa_path = os.path.join(self.root_dir,"models/fsa.fake.txt")
+        self.source_path = os.path.join(self.root_dir,"models/source.fake.txt")
         self.print_beam = 1
-        if self.lm:
-            self.cmd = "{} --interactive 1 --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -s -b {} -L 160 -k 1 {} kbest{}.txt --fsa {} --print-beam {}".format(self.rnn, beam_size, self.model_path, self.port, self.fsa_path,self.print_beam)
-        else:
-            self.cmd = "{} --interactive-line 1 --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -b {} -L 160 -k 1 {} {} kbest{}.txt --fsa {} --print-beam {} --dec-ratio 0.0 100.0".format(self.rnn, beam_size,  self.source_path, self.model_path, self.port, self.fsa_path, self.print_beam)
+
+        self.cmd = "{} --interactive-line 1 --interactive 1 --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -b {} -L 160 --decode-main-data-files {} -k 1 {} {} --fsa {} --print-beam {} --dec-ratio 0.0 100.0 --legacy-model {}".format(self.rnn, beam_size,  self.source_path, self.model_path, self.kbest_path, self.fsa_path, self.print_beam, legacy_model)
             
+
     def start_server(self):
         print "loading the model"
         print self.cmd
@@ -84,12 +84,12 @@ def start_server_thread(port,model,bs):
 
 from multiprocessing import Process
 
-p1 = Process(target=start_server_thread, args=(10020,2,50))
-#p2 = Process(target=start_server_thread, args=(10021,2,200))
+p1 = Process(target=start_server_thread, args=(10020,0,50))
+#p2 = Process(target=start_server_thread, args=(10021,0,200))
 
 
 p1.start()
-p2.start()
+
 
 
 

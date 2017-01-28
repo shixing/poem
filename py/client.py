@@ -10,9 +10,18 @@ from flask import request, make_response
 from datetime import datetime
 from nltk import word_tokenize
 import random
-host = "holst.isi.edu"
-ports = [10010, 10011, 10012]
+host = "vivaldi.isi.edu"
+ports = [10010]
 size = 10240
+
+beams = [50]
+interactive_beams = [50]
+line_reverses = [1]
+interactive_ports = [10020]
+
+
+
+
 
 root_dir = os.path.abspath(__file__ + "/../../")
 fsa_path_tp = os.path.join(root_dir, "fsas/poem.fsa")
@@ -24,14 +33,17 @@ before_path_tp = os.path.join(root_dir, "fsas/before.txt")
 after_path_tp = os.path.join(root_dir, "fsas/after.txt")
 ngram_path = os.path.join(root_dir,"models/5grams.txt")
 curse_path = os.path.join(root_dir,"models/curse.txt")
+mono_path = os.path.join(root_dir,"models/mono.txt")
+sentiment_path = os.path.join(root_dir,"models/sentiment.txt")
+concrete_path = os.path.join(root_dir,"models/concrete.txt")
+
+log_path = os.path.join(root_dir,"log/log.txt")
 
 interactive_folder_tp = os.path.join(root_dir, 'fsas_interactive/data')
 interactive_folder = interactive_folder_tp
 
-beams = [50, 200, 1000]
-interactive_beams = [50, 200]
-line_reverses = [1, 1]
-interactive_ports = [10020, 10021]
+
+################# Plagiarism Check ################# 
 
 def load_ngram():
     d = {}
@@ -57,6 +69,8 @@ def check_plagiarism(lines,ngram):
     for line in lines:
         d = d.union(check_p(line))
     return d
+
+################# Status ################# 
 
 class StatusMap:
     # 0 -> 1 -> 2 -> 3 -> 0
@@ -92,6 +106,7 @@ class StatusMap:
 
 sm = StatusMap()
 
+################# Util Functions ################# 
 
 def receive_all(conn):
     data = ""
@@ -133,8 +148,8 @@ def post_process(lines,interactive=False):
             if not interactive:
                 r += "\n"
     f.close()
-    os.remove(before_path)
-    os.remove(after_path)
+    #os.remove(before_path)
+    #os.remove(after_path)
     return r
 
 
@@ -163,7 +178,8 @@ def process_results(data):
     for line in ll:
         if line.startswith("<START>"):
             poems.append(process_poem(line))
-        if line.startswith("Total:") or line.startswith("Forward:") or line.startswith("Expand:"):
+
+        if line.startswith("expand :") or line.startswith("forward_target :") or line.startswith("total :"):
             print sys.stderr.write(line + "\n")
             times.append(line)
 
@@ -217,7 +233,7 @@ def process_results_interactive(data, line_reverse=1):
     for line in ll:
         if line.startswith("<START>"):
             poems.append(process_poem_interactive(line, line_reverse))
-        if line.startswith("Total:") or line.startswith("Forward:") or line.startswith("Expand:"):
+        if line.startswith("expand :") or line.startswith("forward_target :") or line.startswith("total :"):
             print sys.stderr.write(line + "\n")
             times.append(line)
 
@@ -264,12 +280,9 @@ def to_table_html_2(tables):
     html += "</table>"
     return html
 
-
-
 def to_table_html(tables):
     html = "<table class=\"table table-bordered\">"
-    titles = ["Word/phrase", "In CMU", "Scans",
-              "LM", "Chosen for rhyme", "Weight"]
+    titles = ["Word/phrase"]
     html += "<thead><tr>{}</tr></thead>".format(
         " ".join(["<th>{}</th>".format(x) for x in titles]))
 
@@ -335,62 +348,7 @@ def process_topic(topic):
     return topic
 
 
-def get_poem_compare(topic, c1, c2, index=0):
-    # return times, poems, rhyme_words, rhyme_info_html.
-
-    r = random.randint(1, 100000)
-
-    def rf(path):
-        return '{}.{}'.format(path, r)
-
-    fsa_path = rf(fsa_path_tp)
-    source_path = rf(source_path_tp)
-    rhyme_path = rf(rhyme_path_tp)
-
-    cmd = ["bash", "run.sh", topic, fsa_path, source_path, rhyme_path]
-    print cmd
-    sys.stderr.write("generating fsa!\n")
-    sm.next_status(index)
-
-    sp.call(cmd, cwd=marjan_dir)
-
-    sys.stderr.write("fsa generated! start decoding!\n")
-
-    def _t_(model_type):
-
-        sm.set_status(index, 2)
-        port = ports[model_type]
-        data = ""
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        s.connect((host, port))
-        message = s.recv(1024)
-        print host, port, message
-        assert(message == 'Accept')
-        sm.set_status(index, 3)
-        k = 1
-        s.send("{} {} {}\n".format(k, source_path, fsa_path))
-        data = receive_all(s)
-
-        s.close()
-
-        poems, times = process_results(data)
-        rhyme_words, table_html = get_rhyme(rhyme_path)
-        return times, poems, rhyme_words, table_html
-
-    r1 = _t_(c1['model'])
-    r2 = _t_(c2['model'])
-
-    os.remove(fsa_path)
-    os.remove(source_path)
-    os.remove(rhyme_path)
-    sm.next_status(index)
-
-    return r1, r2
-
-
-def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=False, style = None, withRhymeTable=False):
+def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=False, style = None, withRhymeTable=True):
     # return times, poems, rhyme_words, rhyme_info_html.
 
     r = random.randint(1, 100000)
@@ -459,6 +417,11 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
         args = style
         if args != None:
             print "Here"
+            
+            if "topical" in args and args['topical']:
+                topical = float(args['topical'])
+                encourage_weights[0] = topical
+
             if "encourage_words" in args:
                 encourage_words = args['encourage_words'].lower().split()
                 if len(encourage_words) > 0:
@@ -487,6 +450,25 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
                 cword = float(args['cword'])
                 encourage_files.append(curse_path)
                 encourage_weights.append(cword)
+            
+            print args
+            if "mono" in args and args["mono"]:
+                mono_weight = float(args['mono'])
+                if mono_weight != 0.0:
+                    encourage_weights.append(mono_weight)
+                    encourage_files.append(mono_path)
+
+            if "sentiment" in args and args["sentiment"]:
+                sentiment_weight = float(args["sentiment"])
+                if sentiment_weight != 0.0:
+                    encourage_weights.append(sentiment_weight)
+                    encourage_files.append(sentiment_path)
+            
+            if "concrete" in args and args["concrete"]:
+                concrete_weight = float(args["concrete"])
+                if concrete_weight != 0.0:
+                    encourage_weights.append(concrete_weight)
+                    encourage_files.append(concrete_path)
                 
             message += " encourage_list_files:{} encourage_weights:{}".format(",".join(encourage_files), ",".join([str(x) for x in encourage_weights]))
                 
@@ -496,8 +478,6 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
             if "allit" in args and args["allit"]:
                 allit = float(args['allit'])
                 message += " alliteration:{}".format(allit)
-            if "slant" in args and args["slant"]:
-                slant = float(args['slant'])
                 # not support now .. 
             if "wordlen" in args and args["wordlen"]:
                 wordlen = float(args['wordlen'])
@@ -546,17 +526,26 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
     else:
         return times, new_poems, rhyme_words, table_html
 
-def log_it(beamsize,topic,poems,times):
-    flog = open(os.path.join(root_dir, 'py/log.txt'), 'a')
+
+def log_it(beamsize,topic,poems,times, weights = None):
+    flog = open(log_path, 'a')
     flog.write("Time: " + datetime.now().isoformat() + "\n")
     flog.write("Beam_size: {}\nTopic: {}\n".format(beamsize, topic))
+    if weights:
+        for key in weights:
+            flog.write("{}: {}\n".format(key, weights[key]))
     flog.write('\n'.join(times) + "\n")
     flog.write("----------------------\n")
     flog.write("\n".join([x.replace("<br//>", '\n') for x in poems]) + "\n")
     flog.write('\n')
     flog.close()
 
-## app and api
+def mymkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+
+################# API ################# 
 
 app = Flask(__name__)
 api = Api(app)
@@ -582,60 +571,6 @@ class Status(Resource):
             index = args['id']
 
         return make_response(sm.get_status(index))
-
-# need to reserve, daniel is using this one
-class POEM(Resource):
-
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('k')
-        parser.add_argument('model')
-        parser.add_argument('topic')
-        parser.add_argument('id')
-
-        args = parser.parse_args()
-        k = int(args['k'])
-        model_type = int(args['model'])
-        topic = args['topic']
-        index = 'default'
-        if "id" in args:
-            index = args['id']
-
-        assert(k > 0)
-        assert(model_type == 0 or model_type ==
-               1 or model_type == 2 or model_type == -1)
-        assert(len(topic) > 0)
-
-        print model_type, k, topic
-        times, poems, rhyme_words, table_html = get_poem(
-            k, model_type, topic, index)
-
-        # log it
-        if model_type >= 0:
-            log_it(beams[model_type],topic,poems,times)
-
-        poem_str = "<br//><br//>".join(poems)
-
-        rhyme_words_html = "<br//>".join(rhyme_words)
-
-        config_str = ""
-
-        f = open(os.path.join(root_dir, 'py/config.txt'))
-        for line in f:
-            config_str += line.strip() + "<br//>"
-        f.close()
-
-        d = {}
-        d['poem'] = poem_str
-        d['config'] = config_str
-        d['rhyme_words'] = rhyme_words_html
-        d['rhyme_info'] = table_html[0]
-        d['exact_rhyme_candidates'] = table_html[1]
-        json_str = json.dumps(d, ensure_ascii=False)
-        r = make_response(json_str)
-
-        return r
-
 
 ################### Interactive ####################
 
@@ -686,12 +621,6 @@ class Confirm(Resource):
 
         return r
 
-
-def mymkdir(path):
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-
 def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
     def rf(path, r):
         return '{}.{}'.format(path, r)
@@ -708,8 +637,7 @@ def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
            str(line_reverse), interactive_folder, source_path, rhyme_path]
     
     if nline == 14 or nline == 4 or nline == 2:
-        cmd = ["bash", "run-interactive-different-line-numbers.sh", topic,
-               str(line_reverse), interactive_folder, source_path, rhyme_path, encourage_path, str(nline)]
+        cmd = ["bash", "run-interactive-different-line-numbers.sh", topic, interactive_folder, source_path, rhyme_path, encourage_path, str(nline)]
 
     sys.stderr.write("generating rhyme!\n")
 
@@ -821,7 +749,7 @@ class POEMI(Resource):
 
         config_str = ""
 
-        f = open(os.path.join(root_dir, 'py/config.txt'))
+        f = open(os.path.join(root_dir, 'models/config.txt'))
         for line in f:
             config_str += line.strip() + "<br//>"
         f.close()
@@ -839,135 +767,9 @@ class POEMI(Resource):
 
         return r
 
-def load_random_topic():
-    topics = []
-    f = open('random_topic.txt')
-    for line in f:
-        topics.append(line.strip())
-    r = random.randint(0, len(topics) - 1)
-    f.close()
-    return process_topic(topics[r])
 
 
-def weighted_choice(choices):
-    total = sum(w for c, w in choices)
-    r = random.uniform(0, total)
-    upto = 0
-    for c, w in choices:
-        if upto + w >= r:
-            return c
-        upto += w
-
-
-def load_compare(fn):
-    f = open(fn)
-    line = f.readline()
-
-    def get_config(line):
-        c = [x.split("=") for x in line.split()]
-        poem1 = {}
-        for k, v in c:
-            poem1[k] = int(v)
-        return poem1
-    c1 = get_config(line)
-    line = f.readline()
-    c2 = get_config(line)
-    f.close()
-    return (c1, c2)
-
-
-def load_random_config():
-    f = open(os.path.join(root_dir, 'compare/random_compare.txt'))
-    choices = []
-    for line in f:
-        ll = line.split()
-        choices.append((ll[0], float(ll[1])))
-    config_file = weighted_choice(choices)
-    config_path = os.path.join(root_dir, "compare/" + config_file)
-    f.close()
-    c1, c2 = load_compare(config_path)
-    return c1, c2, config_file
-
-
-class POEM_compare(Resource):
-
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('topic')
-        parser.add_argument('id')
-
-        args = parser.parse_args()
-
-        topic = args['topic']
-        if topic == "-1":
-            # choose from random topic
-            topic = load_random_topic()
-
-        index = 'default'
-        if "id" in args:
-            index = args['id']
-
-        c1, c2, config_file = load_random_config()
-
-        print "poem_compare", index, topic, c1, c2, config_file
-        r1, r2 = get_poem_compare(topic, c1, c2, index)
-
-        
-
-
-        pome1 = ""
-        poem2 = ""
-        if len(r1[1]) > 0:
-            poem1 = r1[1][0][0]
-        if len(r2[1]) > 0:
-            poem2 = r2[1][0][0]
-
-
-        log_it(beams[c1['model']], topic, [poem1], r1[0])
-        log_it(beams[c2['model']], topic, [poem2], r2[0])
-
-
-        reverse = random.randint(0, 1)
-
-        print reverse, poem1
-
-        if reverse == 1:
-            poem1, poem2 = poem2, poem1
-
-        d = {}
-        d['poem1'] = poem1
-        d['poem2'] = poem2
-        d['reverse'] = reverse
-        d['config_file'] = config_file
-        d['topic'] = topic
-        json_str = json.dumps(d, ensure_ascii=False)
-        r = make_response(json_str)
-
-        return r
-
-
-class POEM_submit(Resource):
-
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('topic')
-        parser.add_argument('result')
-        parser.add_argument('poem1')
-        parser.add_argument('poem2')
-        parser.add_argument('config_file')
-
-        args = parser.parse_args()
-        d = args
-        d['time'] = datetime.now().isoformat()
-        json_str = json.dumps(d, ensure_ascii=False)
-        json_str.replace('\n', "\\n")
-        f = open(os.path.join(root_dir, 'py/compare_result.txt'), 'a')
-        f.write(json_str + "\n")
-        f.close()
-
-        r = make_response("Done")
-
-        return r
+################### Auto mode ####################
 
 class POEM_check(Resource):
 
@@ -979,22 +781,25 @@ class POEM_check(Resource):
         parser.add_argument('nline')
         parser.add_argument('id')
         # style
-        # do not support phrase now;
         parser.add_argument("encourage_words")
         parser.add_argument("disencourage_words")
         parser.add_argument("enc_weight")
         parser.add_argument('cword')
         parser.add_argument('reps')
         parser.add_argument('allit')
-        parser.add_argument('slant')
         parser.add_argument('wordlen')
-        
-        # no_fsa
+
+        parser.add_argument('topical')
+        parser.add_argument('mono')
+        parser.add_argument('sentiment')
+        parser.add_argument('concrete')
+        # no_fsa for adjust style
         parser.add_argument('no_fsa')
-        
 
         args = parser.parse_args()
         print args
+
+        # parse the tags
         k = int(args['k'])
         model_type = int(args['model'])
         topic = args['topic']
@@ -1017,8 +822,7 @@ class POEM_check(Resource):
         
 
         assert(k > 0)
-        assert(model_type == 0 or model_type ==
-               1 or model_type == 2 or model_type == -1)
+        assert(model_type == 0 or model_type == -1)
         assert(len(topic) > 0)
 
         print model_type, k, topic
@@ -1028,7 +832,7 @@ class POEM_check(Resource):
         
         # log it
         if model_type >= 0:
-            log_it(beams[model_type],topic,poems,times)
+            log_it(beams[model_type],topic,poems,times,weights = args)
 
         phrases = []
         if len(lines) > 0:
@@ -1041,7 +845,7 @@ class POEM_check(Resource):
 
         config_str = ""
 
-        f = open(os.path.join(root_dir, 'py/config.txt'))
+        f = open(os.path.join(root_dir, 'models/config.txt'))
         for line in f:
             config_str += line.strip() + "<br//>"
         f.close()
@@ -1059,87 +863,19 @@ class POEM_check(Resource):
 
         return r
 
-class POEM_short(Resource):
+################### Add Endpoint ####################
 
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('k')
-        parser.add_argument('model')
-        parser.add_argument('topic')
-        parser.add_argument('nline')
-        parser.add_argument('id')
+api.add_resource(POEM_check, '/api/poem_check')
 
-        args = parser.parse_args()
-        k = int(args['k'])
-        model_type = int(args['model'])
-        topic = args['topic']
-        index = 'default'
-        nline = 2
-        if "id" in args:
-            index = args['id']
-        if "nline" in args:
-            nline = int(args['nline'])        
-        if not (nline == 2 or nline == 4 or nline == 14):
-            nline = 2
-
-        assert(k > 0)
-        assert(model_type == 0 or model_type ==
-               1 or model_type == 2 or model_type == -1)
-        assert(len(topic) > 0)
-
-
-        print model_type, k, topic, nline
-        times, poems, rhyme_words, table_html = get_poem(
-            k, model_type, topic, index, check=False, nline = nline)
-        
-        
-        # log it
-        if model_type >= 0:
-            log_it(beams[model_type],topic,poems,times)
-
-        lines = []
-        phrases = []
-        if len(lines) > 0:
-            phrases = list(check_plagiarism(lines[0],ngram))
-        phrase_str = "<br//>".join(phrases)
-
-        poem_str = "<br//><br//>".join(poems)
-
-        rhyme_words_html = "<br//>".join(rhyme_words)
-
-        config_str = ""
-
-        f = open(os.path.join(root_dir, 'py/config.txt'))
-        for line in f:
-            config_str += line.strip() + "<br//>"
-        f.close()
-
-        d = {}
-        d['poem'] = poem_str
-        d['config'] = config_str
-        d['rhyme_words'] = rhyme_words_html
-        d['rhyme_info'] = table_html
-        d['pc'] = phrase_str
-        json_str = json.dumps(d, ensure_ascii=False)
-        r = make_response(json_str)
-
-        return r
-
-
-
-# add endpoint
-api.add_resource(POEM, '/api/poem')
+# for interactive model
 api.add_resource(Rhyme, "/api/rhyme")
 api.add_resource(Confirm, "/api/confirm")
 api.add_resource(Status, '/api/poem_status')
 api.add_resource(POEMI, '/api/poem_interactive')
-api.add_resource(POEM_submit, '/api/poem_submit')
-api.add_resource(POEM_compare, '/api/poem_compare')
-api.add_resource(POEM_check, '/api/poem_check')
-api.add_resource(POEM_short, '/api/poem_short')
+
 
 
 if __name__ == '__main__':
     # read_from_stdin()
     app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.run(threaded=True, debug=True, host='cage.isi.edu', port=8080)
+    app.run(threaded=True, debug=True, host='vivaldi.isi.edu', port=8080)
