@@ -3,8 +3,10 @@ gmodel="";
 gtopic="";
 api_host = "vivaldi.isi.edu"
 
-
 $('#translate-button').click(function() {
+
+    before_translate();
+
     var btn = $(this);
     btn.button('loading');
     $("#poem").html("");
@@ -86,7 +88,10 @@ $('#translate-button').click(function() {
 
 	    jd = $.parseJSON(response_data);
 	    $("#poem").html(jd.poem);
+	    $("#npoem").html(jd.n_poem);
+	    $("#poem_id").html(jd.poem_id);
 	    $("#status").html("Ready");
+	    init_star();
 	}
     }).always(function (){
 	btn.button('reset');

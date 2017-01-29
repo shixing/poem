@@ -10,6 +10,8 @@ from flask import request, make_response
 from datetime import datetime
 from nltk import word_tokenize
 import random
+from google_datastore import GCStore
+
 host = "vivaldi.isi.edu"
 ports = [10010]
 size = 10240
@@ -18,10 +20,6 @@ beams = [50]
 interactive_beams = [50]
 line_reverses = [1]
 interactive_ports = [10020]
-
-
-
-
 
 root_dir = os.path.abspath(__file__ + "/../../")
 fsa_path_tp = os.path.join(root_dir, "fsas/poem.fsa")
@@ -42,6 +40,7 @@ log_path = os.path.join(root_dir,"log/log.txt")
 interactive_folder_tp = os.path.join(root_dir, 'fsas_interactive/data')
 interactive_folder = interactive_folder_tp
 
+my_gcstore = GCStore()
 
 ################# Plagiarism Check ################# 
 
@@ -528,8 +527,28 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
 
 
 def log_it(beamsize,topic,poems,times, weights = None):
+    # log in google datastore
+    date = datetime.now()
+    date_str = date.isoformat()
+    poem_str = "\n".join([x.replace("<br//>", '\n') for x in poems])
+    time_dict = {}
+    for t in times:
+        if t.startswith("expand :"):
+            t = float(t[8:-4])
+            time_dict['expand'] = t
+        elif t.startswith("forward_target :"):
+            t = float(t[16:-4])
+            time_dict['forward_target'] = t
+        elif t.startswith("total :"):
+            t = float(t[7:-4])
+            time_dict['total'] = t
+    poem_id, n_poem = my_gcstore.log_poem(topic, date, poem_str, beamsize, time_dict, weights)
+
+    # log in the file
     flog = open(log_path, 'a')
-    flog.write("Time: " + datetime.now().isoformat() + "\n")
+    flog.write("poem_id: {}\n".format(poem_id))
+    flog.write("npoem: {}\n".format(n_poem))
+    flog.write("Time: " + date_str + "\n")
     flog.write("Beam_size: {}\nTopic: {}\n".format(beamsize, topic))
     if weights:
         for key in weights:
@@ -539,6 +558,7 @@ def log_it(beamsize,topic,poems,times, weights = None):
     flog.write("\n".join([x.replace("<br//>", '\n') for x in poems]) + "\n")
     flog.write('\n')
     flog.close()
+    return poem_id, n_poem
 
 def mymkdir(path):
     if not os.path.exists(path):
@@ -770,6 +790,30 @@ class POEMI(Resource):
 
 
 ################### Auto mode ####################
+class Feedback(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('poem_id')
+        parser.add_argument('score')
+        
+        args = parser.parse_args()
+        print args
+
+        poem_id = int(args['poem_id'])
+        score = float(args['score'])
+        my_gcstore.set_score(poem_id, score)
+        
+        r = make_response("Thanks")
+        return r
+        
+class NPOEM(Resource):
+    def get(self):
+        n = my_gcstore.get_npoem()
+        d = {}
+        d['value'] = n
+        json_str = json.dumps(d, ensure_ascii=False)
+        r = make_response(json_str)
+        return r
 
 class POEM_check(Resource):
 
@@ -788,7 +832,7 @@ class POEM_check(Resource):
         parser.add_argument('reps')
         parser.add_argument('allit')
         parser.add_argument('wordlen')
-
+        
         parser.add_argument('topical')
         parser.add_argument('mono')
         parser.add_argument('sentiment')
@@ -832,7 +876,8 @@ class POEM_check(Resource):
         
         # log it
         if model_type >= 0:
-            log_it(beams[model_type],topic,poems,times,weights = args)
+            poem_id, n_poem = log_it(beams[model_type],topic,poems,times,weights = args)
+            print poem_id, n_poem
 
         phrases = []
         if len(lines) > 0:
@@ -858,20 +903,24 @@ class POEM_check(Resource):
         d['exact_rhyme_candidates'] = table_html[1]
         d['slant_rhyme_candidates'] = "<br//>".join(table_html[2])
         d['pc'] = phrase_str
+        d['poem_id'] = poem_id
+        d['n_poem'] = n_poem
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
 
         return r
 
 ################### Add Endpoint ####################
-
 api.add_resource(POEM_check, '/api/poem_check')
+api.add_resource(NPOEM, '/api/npoem')
+api.add_resource(Feedback, '/api/feedback')
 
 # for interactive model
 api.add_resource(Rhyme, "/api/rhyme")
 api.add_resource(Confirm, "/api/confirm")
 api.add_resource(Status, '/api/poem_status')
 api.add_resource(POEMI, '/api/poem_interactive')
+
 
 
 

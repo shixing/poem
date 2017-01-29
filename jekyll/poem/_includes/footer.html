@@ -4,14 +4,22 @@
   </div>
 </div>
 
+<script src="{{ '/data/js/header.js' | prepend: site.baseurl }}"></script>
+
 {% if page.url == '/index.html' or page.url == '/' %}
+	<script src="{{ '/data/js/star.js' | prepend: site.baseurl }}"></script>
         <script src="{{ '/data/js/poem.js' | prepend: site.baseurl }}"></script>
+	<script src="{{ '/data/quote/quote.js' | prepend: site.baseurl }}"></script>
 {% endif %}
 
 
+
 {% if page.url == '/advance/'%}
+	<script src="{{ '/data/js/star.js' | prepend: site.baseurl }}"></script>
+
         <script src="{{ '/data/js/poem_advance.js' | prepend: site.baseurl }}"></script>
 	<script src="{{ '/data/js/poem_menu.js' | prepend: site.baseurl }}"></script>
+
 
 {% endif %}
 

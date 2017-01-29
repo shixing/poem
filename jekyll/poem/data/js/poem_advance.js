@@ -115,6 +115,9 @@ function onselect_language(n){
 
 
 $('#adjust-button').click(function() {
+
+    before_translate();
+
     var btn = $(this);
     $("#translate-button").prop('disabled',true);
     btn.button('loading');
@@ -142,7 +145,7 @@ $('#adjust-button').click(function() {
 
 
     eng_data = {
-	topic:"repeat",
+	topic:gtopic,
 	k:1,
 	model:"0",
 	id:id,
@@ -203,6 +206,10 @@ $('#adjust-button').click(function() {
 	success: function(response_data) {
 	    $("#translate-button").prop('disabled',false);
 	    jd = $.parseJSON(response_data);
+
+	    $("#npoem").html(jd.n_poem);
+	    $("#poem_id").html(jd.poem_id);
+
 	    $("#poem").html(jd.poem);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
@@ -210,6 +217,8 @@ $('#adjust-button').click(function() {
 	    $("#exact-rhyme-candidates").html(jd.exact_rhyme_candidates);
 	    $("#pc").html(jd.pc);
 	    $("#status").html("Ready");
+	    
+	    init_star();
 	}
     }).always(function (){
 	$("#translate-button").prop('disabled',false);
@@ -235,6 +244,9 @@ function reset_style(){
 
 
 $('#translate-button').click(function() {
+
+    before_translate();
+
     var btn = $(this);
     $("#adjust-button").prop('disabled',true);
     btn.button('loading');
@@ -367,6 +379,8 @@ $('#translate-button').click(function() {
 	    $("#adjust-button").prop('disabled',false);
 
 	    jd = $.parseJSON(response_data);
+	    $("#npoem").html(jd.n_poem);
+	    $("#poem_id").html(jd.poem_id);
 	    $("#poem").html(jd.poem);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
@@ -374,6 +388,8 @@ $('#translate-button').click(function() {
 	    $("#exact-rhyme-candidates").html(jd.exact_rhyme_candidates);
 	    $("#pc").html(jd.pc);
 	    $("#status").html("Ready");
+
+	    init_star();
 	}
     }).always(function (){
 	btn.button('reset');
