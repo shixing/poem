@@ -1,11 +1,14 @@
 from google.cloud import datastore
 import google.cloud.exceptions
 import sys
+import time 
+from retrying import retry
 
 class GCStore:
     def __init__(self):
         self.client = datastore.Client()
-        
+    
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def get_npoem(self):
         key = self.client.key("counter",'npoem')
         counter = self.client.get(key)
@@ -16,6 +19,7 @@ class GCStore:
             self.client.put(counter)
         return counter['value']
 
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def increase_npoem(self):
         value = -1
         key = self.client.key("counter",'npoem')
@@ -27,6 +31,7 @@ class GCStore:
         self.client.put(counter)
         return value
 
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def set_score(self,poem_id, score):
         with self.client.transaction():
             key = self.client.key("poem",poem_id)
@@ -34,7 +39,7 @@ class GCStore:
             poem['score'] = score
             self.client.put(poem)
         
-
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def log_poem(self, topic_str, date, poem_str, beam_size, time_dict, weights_dict = None):
         # return id
         npoem = self.increase_npoem()

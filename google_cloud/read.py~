@@ -1,0 +1,47 @@
+# python read.py datastore_backup_datastore_backup_2017_01_31_poem
+import sys
+import os
+from google.appengine.api.files import records
+from google.appengine.datastore import entity_pb
+#from google.appengine.api import datastore
+from google.cloud import datastore
+
+def str_to_entity(s):
+    print s
+    entity_proto = entity_pb.EntityProto(contents=s)
+    entity = datastore.Entity.FromPb(entity_proto)
+    return entity
+    
+
+def record_to_entity(record, embed_name = ['style','time']):
+    entity = str_to_entity(record)
+    print entity
+    for name in embed_name:
+        s = entity[name]
+        e = str_to_entity(s)
+        entity[name] = e
+    return entity
+    
+		
+
+
+def iter_entity(folder):
+    for d, _, files in os.walk(folder):
+        for fn in files:
+            path = os.path.join(d, fn)
+	    raw = open(path,'r')
+	    reader = records.RecordsReader(raw)
+	    for record in reader:
+                entity = record_to_entity(record)
+		yield entity
+	    raw.close()
+
+def main():
+    folder = sys.argv[1]
+    i = 0 
+    for poem in iter_entity(folder):
+        i += 1
+        print poem
+    print i 
+if __name__ == "__main__":
+    main()

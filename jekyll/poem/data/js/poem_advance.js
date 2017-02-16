@@ -230,6 +230,9 @@ $('#adjust-button').click(function() {
 
 function reset_style(){
 
+    $('input[name=encourage_words]').val("");
+    $('input[name=disencourage_words]').val("");
+
     $("input[name=enc_weight]").val(5);
     $("#cwords").slider().slider("setValue",0,true,true);
     $("#reps").slider().slider("setValue",25,true,true);

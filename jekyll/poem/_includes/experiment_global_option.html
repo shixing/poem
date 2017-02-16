@@ -1,0 +1,297 @@
+<div style="margin-bottom:10px">
+  <!-- Language -->
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b>Language</b>
+    </div>
+    <div class="col-lg-6">
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="model" value="0" checked="checked" onclick="onselect_language(1)">English </label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="model" value ="1" onclick="onselect_language(2)">Español</label>
+	</div>
+      </div>
+    </div>
+  </div> <!-- row -->
+
+  <!-- Number of Lines -->
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b>#Line</b>
+    </div>
+    <div class="col-lg-6">
+      {% if page.url == '/interactive/' %}
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value="2" onclick="nline_onchange(2)">2 lines </label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value ="4" checked="checked" onclick="nline_onchange(4)">4 lines</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value ="14" onclick="nline_onchange(14)">14 lines</label>
+	</div>
+      </div>
+      {% else %}
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value="2" onclick="to_disable_adjust()">2 lines </label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value ="4" onclick="to_disable_adjust()">4 lines</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="nline" value ="14" checked="checked" onclick="to_disable_adjust()">14 lines</label>
+	</div>
+      </div>
+      {% endif %}
+      
+    </div>
+  </div> <!-- row -->
+
+  <!-- Genre -->
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b>Genre</b>
+    </div>
+    <div class="col-lg-6">
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="genre" value="lyrical" >Lyrical</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="genre" value ="newswire">Newswire</label>
+	</div>
+      </div>
+    </div>
+  </div> <!-- row -->
+
+  <!-- Meter -->
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b>Meter</b>
+    </div>
+    <div class="col-lg-6">
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="meter" value="iambic" >Iambic</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="meter" value ="none">None</label>
+	</div>
+      </div>
+    </div>
+  </div> <!-- row -->
+
+  <!-- Format -->
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b>Format</b>
+    </div>
+    <div class="col-lg-6">
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value="user_defined" >User-defined</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value ="ss">Shakespearean sonnet</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value ="ps">Petrarchan sonnet</label>
+	</div>
+      </div>
+    </div>
+  </div> <!-- row -->
+
+  <div class="row" style="display:none">
+    <div class="col-lg-1">
+      <b></b>
+    </div>
+    <div class="col-lg-6">
+      <div class="input-group">
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value ="haiku">haiku</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value ="couplet">couplet</label>
+	</div>
+	<div class="radio-inline">
+	  <label><input type="radio" name="format" value ="random">random</label>
+	</div>
+      </div>
+    </div>
+  </div> <!-- row -->
+
+  <div class="row" style="display:block">
+    <div class="col-lg-10">
+    </div>
+    <div class="col-lg-2">
+      <button id="reset-button" type="button" class="btn btn-primary" onclick="reset_style()">Reset Style</button>
+    </div>
+  </div>
+
+  <!-- Encourage Words -->
+  <div class="row" style="display:block">
+    <div class="col-lg-1">
+      <b>Vocabulary</b>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="input-group">
+	<input type="text" name="encourage_words" class="form-control" placeholder="Encourage words">
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="input-group">
+	<input type="text" name = "disencourage_words" class="form-control" placeholder="discourage words">
+      </div>
+    </div>    
+
+
+    <div class="col-lg-2" style="display:none">
+      <input id="enc" data-slider-id='cwordSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+    </div>
+    <div class="col-lg-1" style="display:none">
+      <div class="input-group input-group-sm">
+	<input type="text" id = "enc_weight" name="enc_weight" class="form-control" placeholder="0.0">
+      </div>
+    </div>
+
+    
+  </div> <!-- row -->
+
+  <!-- Style -->
+  <div class="row">
+    
+    <div class="col-lg-1">
+      <b>Style</b>
+    </div>
+
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>curse words</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="cwords" data-slider-id='cwordSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="25" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "cword_weight" type="text" name="cword_weight" class="form-control" placeholder="-5.0" value="-5.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>repetition</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="reps" data-slider-id='repSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="25" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "reps_weight" type="text" name="reps_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>alliteration</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="allit" data-slider-id='allitSlider' type="text" data-slider-min="-3" data-slider-max="50" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input type="text" id = "allit_weight" name="allit_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>word length</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="wordlen" data-slider-id='wordlenSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "wordlen_weight" type="text" name="wordlen_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="col-lg-1">
+      <b></b>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>topical words</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="topical" data-slider-id='topicalSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "topical_weight" type="text" name="topical_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>monosyllable words</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="mono" data-slider-id='monoSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="25" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "mono_weight" type="text" name="mono_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>positive-sentiment</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="sentiment" data-slider-id='sentimentSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="25" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "sentiment_weight" type="text" name="sentiment_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+    <div class="col-lg-2">
+      <div class="col-lg-12">
+	<span>concrete words</span>
+      </div>
+      <div class="col-lg-12">
+	<input id="concrete" data-slider-id='concreteSlider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="25" data-slider-tooltip="hide"/>     
+      </div>
+      <div class="col-lg-4" style="display:none">
+	<div class="input-group input-group-sm">
+	  <input id = "concrete_weight" type="text" name="concrete_weight" class="form-control" placeholder="0.0">
+	</div>
+      </div>
+    </div>
+
+  </div><!-- row -->
+
+
+</div>

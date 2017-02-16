@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col-lg-8">
+    <div class="input-group input-group-lg">
+      <input type="text" class="form-control" id="input-topic" placeholder="Topic: e.g. civil war">
+      <span class="input-group-btn">
+	<button class="btn btn-default" type="button" id="translate-button" data-loading-text="Generating...">Generate</button>
+	<button type="button" class="btn btn-default" id="adjust-button" data-loading-text="Adjusting...">Re-generate with same rhyme words</button>
+      </span>
+    </div><!-- /input-group -->
+  </div><!-- /.col-lg-6 -->
+</div><!-- /.row -->
+
+<div class="row">
+  <div class="col-lg-4">
+    <span>Poem-ID: </span>
+    <span id="poem_id_show"></span>
+  </div>
+  <div class="col-lg-4">
+    <span># Re-generate & Score: </span>
+    <span id="regen_time"></span>
+  </div>
+  <div class="col-lg-4">
+    <span>Experiment Ticket: </span>
+    <span id="exp_ticket"></span>
+  </div>
+</div><!-- /.row -->
