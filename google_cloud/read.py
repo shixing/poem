@@ -24,6 +24,10 @@ def record_to_dict(record, embed_name = ['style','time']):
     entity_proto, entity = str_to_entity(record)
 
     d = {}
+    # add id
+    d['poem_id'] =  entity_proto.key_.path_.element_[0].id_
+    
+    #
     for key in entity: 
         if key in embed_name:
             s = entity[key]

@@ -1,7 +1,0 @@
-from google.cloud import datastore
-import google.cloud.exceptions
-
-class GCStore:
-    def __init__(self):
-        self.client = datastore.Client()
-        

@@ -11,6 +11,7 @@ from datetime import datetime
 from nltk import word_tokenize
 import random
 from google_datastore import GCStore
+import unicodedata
 
 host = "vivaldi.isi.edu"
 ports = [10010]
@@ -335,6 +336,9 @@ def get_rhyme(fn):
     table_html = to_table_html(tables)
     return words, (table_html,rhyme_table_html,slant_rhymes)
 
+def strip_accents(string):
+    return unicodedata.normalize('NFKD', string).encode('ASCII', 'ignore').decode('utf8')
+
 
 def process_topic(topic):
     topic = topic.lower()
@@ -343,7 +347,8 @@ def process_topic(topic):
             if not topic[i].isalpha():
                 tmp = topic[i]
                 topic = topic.replace(tmp,"_")
-    topic = '{}'.format(" ".join(topic.split("_")))
+    topic = u'{}'.format(u" ".join(topic.split(u"_")))
+    topic = strip_accents(topic)
     return topic
 
 
@@ -544,20 +549,6 @@ def log_it(beamsize,topic,poems,times, weights = None):
             time_dict['total'] = t
     poem_id, n_poem = my_gcstore.log_poem(topic, date, poem_str, beamsize, time_dict, weights)
 
-    # log in the file
-    flog = open(log_path, 'a')
-    flog.write("poem_id: {}\n".format(poem_id))
-    flog.write("npoem: {}\n".format(n_poem))
-    flog.write("Time: " + date_str + "\n")
-    flog.write("Beam_size: {}\nTopic: {}\n".format(beamsize, topic))
-    if weights:
-        for key in weights:
-            flog.write("{}: {}\n".format(key, weights[key]))
-    flog.write('\n'.join(times) + "\n")
-    flog.write("----------------------\n")
-    flog.write("\n".join([x.replace("<br//>", '\n') for x in poems]) + "\n")
-    flog.write('\n')
-    flog.close()
     return poem_id, n_poem
 
 def mymkdir(path):
@@ -839,6 +830,9 @@ class POEM_check(Resource):
         parser.add_argument('concrete')
         # no_fsa for adjust style
         parser.add_argument('no_fsa')
+        
+        parser.add_argument("is_default")
+        parser.add_argument("source")
 
         args = parser.parse_args()
         print args
@@ -869,7 +863,7 @@ class POEM_check(Resource):
         assert(model_type == 0 or model_type == -1)
         assert(len(topic) > 0)
 
-        print model_type, k, topic
+        print model_type, k, topic.encode('utf8')
         times, poems, rhyme_words, table_html,lines = get_poem(
             k, model_type, topic, index, check=True, nline = nline, no_fsa = no_fsa, style = args)
         

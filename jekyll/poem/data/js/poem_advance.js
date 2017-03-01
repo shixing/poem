@@ -140,8 +140,8 @@ $('#adjust-button').click(function() {
     var mono = $('input[name=mono_weight]').val();
     var sentiment = $('input[name=sentiment_weight]').val();
     var concrete = $('input[name=concrete_weight]').val();
-
-
+    var is_default = is_default_setting();
+    var source = "advance";
 
 
     eng_data = {
@@ -161,7 +161,9 @@ $('#adjust-button').click(function() {
 	mono:mono,
 	sentiment:sentiment,
 	concrete:concrete,
-	no_fsa:1
+	no_fsa:1,
+	is_default:is_default,
+	source:source
     };
 
     data = eng_data;
@@ -228,22 +230,6 @@ $('#adjust-button').click(function() {
 
 });
 
-function reset_style(){
-
-    $('input[name=encourage_words]').val("");
-    $('input[name=disencourage_words]').val("");
-
-    $("input[name=enc_weight]").val(5);
-    $("#cwords").slider().slider("setValue",0,true,true);
-    $("#reps").slider().slider("setValue",25,true,true);
-    $("#allit").slider().slider("setValue",0,true,true);
-    $("#wordlen").slider().slider("setValue",0,true,true);
-    
-    $("#topical").slider().slider("setValue",10,true,true);
-    $("#mono").slider().slider("setValue",0,true,true);
-    $("#sentiment").slider().slider("setValue",25,true,true);
-    $("#concrete").slider().slider("setValue",25,true,true);
-}
 
 
 $('#translate-button').click(function() {
@@ -303,7 +289,8 @@ $('#translate-button').click(function() {
     var mono = $('input[name=mono_weight]').val();
     var sentiment = $('input[name=sentiment_weight]').val();
     var concrete = $('input[name=concrete_weight]').val();
-
+    var is_default = is_default_setting();
+    var source = "advance";
 
     eng_data = {
 	topic:topic,
@@ -321,7 +308,9 @@ $('#translate-button').click(function() {
 	topical:topical,
 	mono:mono,
 	sentiment:sentiment,
-	concrete:concrete
+	concrete:concrete,
+	is_default:is_default,
+	source:source
 	};
     spa_data = {
 	    topic:topic,

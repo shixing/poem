@@ -37,6 +37,11 @@ $('#translate-button').click(function() {
     var allit = 0.0;
     var wordlen = 0.0;
     var topical = 1.0;
+    var mono = -5;
+    var sentiment = 0;
+    var concrete = 0;
+    var is_default = 1;
+    var source = "auto";
 
     eng_data = {
 	    topic:topic,
@@ -51,8 +56,13 @@ $('#translate-button').click(function() {
 	    reps:reps,
 	    allit:allit,
 	topical:topical,
-	    wordlen:wordlen
-	};
+	    wordlen:wordlen,
+	    mono:mono,
+	sentiment:sentiment,
+	concrete:concrete,
+	is_default:is_default,
+	source:source
+    };
     data = eng_data;
     left_time = 2;
     estimation = ""
