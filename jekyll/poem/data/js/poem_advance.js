@@ -20,6 +20,22 @@ function to_disable_adjust(){
     }
 }
 
+function highlight_rhyme(poem, rhyme){
+    lines = poem.split("<br//>")
+    rhymes = rhyme.split("<br//>")
+    new_poem = ""
+    for (i = 0; i < rhymes.length; i += 1){
+	line = lines[i].trim()
+	words = rhymes[i]
+	nrhyme = words.split("_").length
+	ll = line.split(" ")
+	new_line = ll.slice(0,ll.length-nrhyme).join(" ") + " " + "<span class=\"rhyme_span\">" + ll.slice(ll.length-nrhyme,ll.length).join(" ") + "</span><br//>"
+	new_poem+=new_line
+    }
+    return new_poem
+}
+
+
 function onselect_language(n){
     // n = 1 English
     // n = 2 Spanish
@@ -211,8 +227,9 @@ $('#adjust-button').click(function() {
 
 	    $("#npoem").html(jd.n_poem);
 	    $("#poem_id").html(jd.poem_id);
+	
 
-	    $("#poem").html(jd.poem);
+	    $("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
@@ -373,7 +390,7 @@ $('#translate-button').click(function() {
 	    jd = $.parseJSON(response_data);
 	    $("#npoem").html(jd.n_poem);
 	    $("#poem_id").html(jd.poem_id);
-	    $("#poem").html(jd.poem);
+	    $("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
