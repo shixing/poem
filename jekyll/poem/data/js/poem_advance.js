@@ -20,10 +20,21 @@ function to_disable_adjust(){
     }
 }
 
+function remove_empty(l){
+    new_l = [];
+    
+    for (i = 0; i<l.length; i ++){
+	if (l[i] != ""){
+	    new_l.push(l[i]);
+	}
+    }
+    return new_l;
+}
+
 function highlight_rhyme(poem, rhyme){
-    lines = poem.split("<br//>")
-    rhymes = rhyme.split("<br//>")
-    new_poem = ""
+    lines = remove_empty(poem.split("<br//>"));
+    rhymes = remove_empty(rhyme.split("<br//>"));
+    new_poem = "";
     for (i = 0; i < rhymes.length; i += 1){
 	line = lines[i].trim()
 	words = rhymes[i]
@@ -31,6 +42,7 @@ function highlight_rhyme(poem, rhyme){
 	ll = line.split(" ")
 	new_line = ll.slice(0,ll.length-nrhyme).join(" ") + " " + "<span class=\"rhyme_span\">" + ll.slice(ll.length-nrhyme,ll.length).join(" ") + "</span><br//>"
 	new_poem+=new_line
+	if (i % 4 == 3) {new_poem +="<br//>";}
     }
     return new_poem
 }
