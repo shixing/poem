@@ -20,6 +20,18 @@ class GCStore:
         return counter['value']
 
     @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    def get_npoem_key(self,counter_key):
+        key = self.client.key("counter",counter_key)
+        counter = self.client.get(key)
+        if counter == None:
+            key = self.client.key("counter",counter_key)
+            counter = datastore.Entity(key = key)
+            counter['value'] = 0
+            self.client.put(counter)
+        return counter['value']
+
+
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def increase_npoem(self):
         value = -1
         key = self.client.key("counter",'npoem')
@@ -30,6 +42,20 @@ class GCStore:
         value = counter['value']
         self.client.put(counter)
         return value
+
+
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    def increase_npoem_key(self,counter_key):
+        value = -1
+        key = self.client.key("counter",counter_key)
+        counter = self.client.get(key)
+        if not "value" in counter:
+            counter['value'] = 0
+        counter['value'] += 1
+        value = counter['value']
+        self.client.put(counter)
+        return value
+
 
     @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def set_score(self,poem_id, score):
@@ -43,6 +69,11 @@ class GCStore:
     def log_poem(self, topic_str, date, poem_str, beam_size, time_dict, weights_dict = None):
         # return id
         npoem = self.increase_npoem()
+        if "source" in weights_dict and weights_dict['source'] == "alexa":
+            npoem_alexa = self.increase_npoem_key("alexa")
+        else:
+            npoem_alexa = self.get_npoem_key("alexa")
+
         with self.client.transaction():
             key = self.client.key("poem")
             poem = datastore.Entity(key=key)
@@ -62,7 +93,7 @@ class GCStore:
             
             self.client.put(poem)
 
-        return poem.key.id, npoem
+        return poem.key.id, npoem, npoem_alexa
         
         
         

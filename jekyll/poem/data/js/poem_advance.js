@@ -401,6 +401,7 @@ $('#translate-button').click(function() {
 
 	    jd = $.parseJSON(response_data);
 	    $("#npoem").html(jd.n_poem);
+	    $("#npoem_alexa").html(jd.n_poem_alexa);
 	    $("#poem_id").html(jd.poem_id);
 	    $("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
 	    $("#config").html(jd.config);

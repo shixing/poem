@@ -547,9 +547,9 @@ def log_it(beamsize,topic,poems,times, weights = None):
         elif t.startswith("total :"):
             t = float(t[7:-4])
             time_dict['total'] = t
-    poem_id, n_poem = my_gcstore.log_poem(topic, date, poem_str, beamsize, time_dict, weights)
+    poem_id, n_poem, n_poem_alexa = my_gcstore.log_poem(topic, date, poem_str, beamsize, time_dict, weights)
 
-    return poem_id, n_poem
+    return poem_id, n_poem, n_poem_alexa
 
 def mymkdir(path):
     if not os.path.exists(path):
@@ -702,7 +702,7 @@ def get_poem_interactive(model_type, action, index, iline, words=[], line_revers
             interactive_folder, "fsa_start-{}".format(iline - 1))
         ins = "fsa {}\n".format(fsa_path)
     elif action == "fsaline":
-        fsa_path = os.path.join(interactive_folder, "fsa{}".format(iline - 1))
+        fsa_path = os.path.join(interactive_folder, "fsa_line{}".format(iline - 1))
         ins = "fsaline {}\n".format(fsa_path)
     elif action == "words":
         words_str = " ".join(words)
@@ -800,8 +800,11 @@ class Feedback(Resource):
 class NPOEM(Resource):
     def get(self):
         n = my_gcstore.get_npoem()
+        n_alexa = my_gcstore.get_npoem_key("alexa")
         d = {}
         d['value'] = n
+        d['value_alexa'] = n_alexa
+        print "npoem/n_poem_alexa", n, n_alexa
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
         return r
@@ -870,8 +873,8 @@ class POEM_check(Resource):
         
         # log it
         if model_type >= 0:
-            poem_id, n_poem = log_it(beams[model_type],topic,poems,times,weights = args)
-            print poem_id, n_poem
+            poem_id, n_poem, n_poem_alexa = log_it(beams[model_type],topic,poems,times,weights = args)
+            print poem_id, n_poem, n_poem_alexa
 
         phrases = []
         if len(lines) > 0:
@@ -899,6 +902,7 @@ class POEM_check(Resource):
         d['pc'] = phrase_str
         d['poem_id'] = poem_id
         d['n_poem'] = n_poem
+        d['n_poem_alexa'] = n_poem_alexa
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
 

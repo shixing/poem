@@ -1,6 +1,6 @@
 api_host = "vivaldi.isi.edu"
 
-var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words are confirmed. Let's start !"]
+var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words are ready. Let's start !<br//>NOTE: Be sure your lines end with the rhyme words in the grey boxes. "]
 
 //global id;
 var gid = 0;

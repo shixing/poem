@@ -16,6 +16,7 @@ function update_npoem(){
 	success: function(response_data) {
 	    jd = $.parseJSON(response_data);
 	    $("#npoem").html(jd.value);
+	    $("#npoem_alexa").html(jd.value_alexa);	    
 	}
     }).always(function (){
     });

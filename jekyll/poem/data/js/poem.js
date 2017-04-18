@@ -99,6 +99,7 @@ $('#translate-button').click(function() {
 	    jd = $.parseJSON(response_data);
 	    $("#poem").html(jd.poem);
 	    $("#npoem").html(jd.n_poem);
+	    $("#npoem_alexa").html(jd.n_poem_alexa);
 	    $("#poem_id").html(jd.poem_id);
 	    $("#status").html("Ready");
 	    init_star();

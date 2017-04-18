@@ -413,6 +413,7 @@ $('#translate-button').click(function() {
 	    scored = 0;
 	    poem_history = {};
 	    $("#poem").html(jd.poem);
+	    $("#npoem_alexa").html(jd.n_poem_alexa);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
