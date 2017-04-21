@@ -10,7 +10,17 @@
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-	<li class="active"><a href="{{ '/experiment/' | prepend: site.baseurl }}">Experiment</a></li>
+	{% if page.url == '/experiment/' or page.url == '/experiment/index.html' %}
+        <li class="active"><a href="{{ '/experiment/' | prepend: site.baseurl }}">Experiment</a></li>
+	{% endif %}
+
+	{% if page.url == '/experiment_interactive/' or page.url == '/experiment_interactive/index.html' %}
+	<li class="active"><a href="{{ '/experiment_interacitve/' | prepend: site.baseurl }}">Experiment:Interactive</a></li>
+	{% endif %}
+
+
+
+
       </ul>
 
       <ul class="nav navbar-nav navbar-right">

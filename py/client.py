@@ -3,6 +3,8 @@ import socket
 import os
 import subprocess as sp
 import json
+import stat
+
 
 from flask import Flask
 from flask.ext.restful import reqparse, abort, Api, Resource
@@ -487,7 +489,6 @@ def get_poem(k, model_type, topic, index=0, check=False, nline = None, no_fsa=Fa
                 wordlen = float(args['wordlen'])
                 message += " wordlen:{}".format(wordlen)
 
-
         s.connect((host, port))
         message_old = s.recv(1024)
         print host, port, message_old
@@ -551,9 +552,15 @@ def log_it(beamsize,topic,poems,times, weights = None):
 
     return poem_id, n_poem, n_poem_alexa
 
+def get_perm(path):
+    return stat.S_IMODE(os.lstat(path).st_mode)
+
+
 def mymkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
+        os.chmod(path, get_perm(path) | stat.S_IWOTH | stat.S_IWGRP)
+
 
 
 ################# API ################# 
@@ -592,9 +599,12 @@ class Rhyme(Resource):
         parser.add_argument('topic')
         parser.add_argument('id')
         parser.add_argument('nline')
+        parser.add_argument('source')
+
 
         args = parser.parse_args()
         topic = args['topic']
+        source = args['source']
         index = 'default'
         nline = None
         if "id" in args:
@@ -604,9 +614,14 @@ class Rhyme(Resource):
 
         times, poems, rhyme_words, table_html = get_rhyme_interactive(
             topic, index, nline = nline)
+
+        date = datetime.now()
+        rhyme_id = my_gcstore.log_rhyme(topic, date, " ".join(rhyme_words), source = source)
+
         d = {}
         d['rhyme_words'] = rhyme_words
         d['rhyme_info'] = table_html
+        d['rhyme_id'] = rhyme_id
 
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
@@ -667,6 +682,8 @@ def get_rhyme_auto(topic, index=0, line_reverse=1, nline = None):
 
 
 def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
+    print "In get_rhyme_interactive"
+
     def rf(path, r):
         return '{}.{}'.format(path, r)
 
@@ -674,12 +691,12 @@ def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
     mymkdir(interactive_folder)
     source_path = os.path.join(interactive_folder, "source.txt")
     rhyme_path = os.path.join(interactive_folder, "rhyme.txt")
-    encourage_path = os.path.join(interactive_folder, "encourage.txt")
+    encourage_path = os.path.join(interactive_folder, "topical.txt")
 
     topic = process_topic(topic)
 
-    cmd = ["bash", "run-interactive.sh", topic,
-           str(line_reverse), interactive_folder, source_path, rhyme_path]
+    #cmd = ["bash", "run-interactive.sh", topic,
+    #       str(line_reverse), interactive_folder, source_path, rhyme_path]
     
     if nline == 14 or nline == 4 or nline == 2:
         cmd = ["bash", "run-interactive-different-line-numbers.sh", topic, interactive_folder, source_path, rhyme_path, encourage_path, str(nline)]
@@ -688,7 +705,7 @@ def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
 
     sm.next_status(index)
 
-    print cmd
+    sys.stderr.write("CMD: {}\n".format(" ".join(cmd)))
     sp.call(cmd, cwd=marjan_dir)
 
     rhyme_words, table_html = get_rhyme(rhyme_path)
@@ -710,7 +727,7 @@ def send_receive(host, port, ins):
     return data
 
 
-def get_poem_interactive(model_type, action, index, iline, words=[],encourage_path = None, encourage_weight = None,  line_reverse=1):
+def get_poem_interactive(model_type, action, index, iline, words=[],encourage_path = None, encourage_weight = None,  line_reverse=1, args = None):
     # return times, poems, rhyme_words, rhyme_info_html.
     def rf(path, r):
         return '{}.{}'.format(path, r)
@@ -719,6 +736,7 @@ def get_poem_interactive(model_type, action, index, iline, words=[],encourage_pa
     mymkdir(interactive_folder)
     source_path = os.path.join(interactive_folder, "source.txt")
     rhyme_path = os.path.join(interactive_folder, "rhyme.txt")
+    topical_path = os.path.join(interactive_folder, "topical.txt")
 
     port = interactive_ports[model_type]
     data = ""
@@ -737,10 +755,61 @@ def get_poem_interactive(model_type, action, index, iline, words=[],encourage_pa
         ins = "fsa {}\n".format(fsa_path)
     elif action == "fsaline":
         fsa_path = os.path.join(interactive_folder, "fsa_line{}".format(iline - 1))
-        if encourage_path == None:
-            ins = "fsaline {}\n".format(fsa_path)
-        else:
-            ins = "fsaline {} {} {}\n".format(fsa_path,encourage_path, encourage_weight)
+
+        encourage_files = []
+        encourage_weights = []
+
+        if encourage_path != None:
+            encourage_files.append(encourage_path)
+            encourage_weights.append(encourage_weight)
+
+
+        if args != None:
+            
+            if "topical" in args and args['topical']:
+                topical = float(args['topical'])
+                encourage_weights.append(topical)
+                encourage_files.append(topical_path)
+                
+            if "cword" in args and args["cword"]:
+                cword = float(args['cword'])
+                encourage_files.append(curse_path)
+                encourage_weights.append(cword)
+            
+            if "mono" in args and args["mono"]:
+                mono_weight = float(args['mono'])
+                if mono_weight != 0.0:
+                    encourage_weights.append(mono_weight)
+                    encourage_files.append(mono_path)
+
+            if "sentiment" in args and args["sentiment"]:
+                sentiment_weight = float(args["sentiment"])
+                if sentiment_weight != 0.0:
+                    encourage_weights.append(sentiment_weight)
+                    encourage_files.append(sentiment_path)
+            
+            if "concrete" in args and args["concrete"]:
+                concrete_weight = float(args["concrete"])
+                if concrete_weight != 0.0:
+                    encourage_weights.append(concrete_weight)
+                    encourage_files.append(concrete_path)
+            
+            message = "encourage_list_files:{} encourage_weights:{}".format(",".join(encourage_files), ",".join([str(x) for x in encourage_weights]))
+
+            if "reps" in args and args["reps"]:
+                reps = float(args['reps'])
+                message += " repetition:{}".format(reps)
+            if "allit" in args and args["allit"]:
+                allit = float(args['allit'])
+                message += " alliteration:{}".format(allit)
+                # not support now .. 
+            if "wordlen" in args and args["wordlen"]:
+                wordlen = float(args['wordlen'])
+                message += " wordlen:{}".format(wordlen)
+
+            
+        ins = "fsaline {} {}\n".format(fsa_path,message)
+
     elif action == "words":
         words_str = " ".join(words)
         ins = "words {}\n".format(words_str)
@@ -766,6 +835,16 @@ class POEMI(Resource):
         parser.add_argument('discourage_words')
         parser.add_argument('discourage_weight')
         parser.add_argument('id')
+        #style
+        parser.add_argument('cword')
+        parser.add_argument('reps')
+        parser.add_argument('allit')
+        parser.add_argument('wordlen')        
+        parser.add_argument('topical')
+        parser.add_argument('mono')
+        parser.add_argument('sentiment')
+        parser.add_argument('concrete')
+
 
         args = parser.parse_args()
 
@@ -798,7 +877,7 @@ class POEMI(Resource):
                 print "poem_interactive", model_type, action, i+1, words, index
 
                 sub_action = "words"
-                _, poems, rhyme_words, table_html = get_poem_interactive(model_type, sub_action, index, i+1, words)
+                _, poems, rhyme_words, table_html = get_poem_interactive(model_type, sub_action, index, i+1, words, args = args)
 
         else:
             words = args['words']
@@ -832,7 +911,7 @@ class POEMI(Resource):
 
             print "poem_interactive", model_type, action, iline, words, index
             _, poems, rhyme_words, table_html = get_poem_interactive(
-                model_type, action, index, iline, words, encourage_path = discourage_path, encourage_weight = discourage_weight)
+                model_type, action, index, iline, words, encourage_path = discourage_path, encourage_weight = discourage_weight, args = args)
 
         rhyme_words_html = "<br//>".join(rhyme_words)
 
@@ -854,6 +933,40 @@ class POEMI(Resource):
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
 
+        return r
+
+class LogI(Resource): # log the interactive steps
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('rhyme_id')
+        parser.add_argument('poems')
+        parser.add_argument('discourage_words')
+        parser.add_argument('hme_flags')
+        parser.add_argument('topic')
+        parser.add_argument('nline')
+        parser.add_argument('source')
+        
+
+        args = parser.parse_args()
+
+        def convert_to_utf8(ss):
+            new_ss = []
+            for s in ss:
+                new_ss.append(s.decode("utf8"))
+            return new_ss
+
+        topic = args['topic']
+        nline = int(args['nline'])
+        rhyme_id = int(args['rhyme_id'])
+        poems = args['poems']
+        discourage_words = args['discourage_words']
+        hme_flags = args['hme_flags']
+        source = args['source']
+        date = datetime.now()
+
+        my_gcstore.log_poem_interactive(topic, nline, rhyme_id, poems, discourage_words, hme_flags,date, source = source)
+        
+        r = make_response("Thanks")
         return r
 
 
@@ -926,7 +1039,7 @@ class Rhyme_Auto(Resource):
         rhyme_words_html = "<br//>".join(rhyme_words)
 
         date = datetime.now()
-        rhyme_id = my_gcstore.log_rhyme(topic, date, " ".join(rhyme_words))
+        rhyme_id = my_gcstore.log_rhyme(topic, date, " ".join(rhyme_words), source = 'rhyme')
 
 
         d = {}
@@ -1054,6 +1167,8 @@ api.add_resource(Rhyme, "/api/rhyme")
 api.add_resource(Confirm, "/api/confirm")
 api.add_resource(Status, '/api/poem_status')
 api.add_resource(POEMI, '/api/poem_interactive')
+api.add_resource(LogI, '/api/log_interactive')
+
 
 
 

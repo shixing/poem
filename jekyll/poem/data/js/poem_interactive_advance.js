@@ -1,4 +1,5 @@
 api_host = "vivaldi.isi.edu"
+page_source = "interactive"
 
 var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm the rhyme words by clicking \"Confirm\"","Rhyme words are ready. Let's start !<br//>NOTE: Be sure your lines end with the rhyme words in the grey boxes. "]
 
@@ -6,19 +7,68 @@ var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm t
 var gid = 0;
 var total_line = 14;
 var processed_line = 0;
+var poem_record;
+var global_rhyme_id = 0;
 nline_onchange(4);
 
 
-class Poem {
-    constructor(rhyme_id){
-	this.hm_flags = []; // human / machine flags
+class PoemRecord {
+    constructor(topic, rhyme_id,  n){
+	this.hme_flags = []; // human / machine flags
 	this.poems = [];
-	this.disencourage_words = [];
+	this.discourage_words = [];
 	this.rhyme_id = rhyme_id;
+	this.topic = topic
+	this.n = n
+	
+	for (var i = 0; i < n; i ++){
+	    this.hme_flags.push('E');
+	    this.poems.push("");
+	    this.discourage_words.push("");
+	}
+    }
+
+    generate_by_human(index){ // index starts from 1
+	var i = index - 1;
+	this.hme_flags[i] = "H";
+	this.discourage_words[i] = "";
+	this.poems[i] = $("#line"+ index.toString()).val()
+
+    }
+    
+    generate_by_machine(index){	// index starts from 1
+	var i = index - 1;
+	this.hme_flags[i] = "M";
+	this.discourage_words[i] = $("#discourage"+ index.toString()).val()
+	this.poems[i] = $("#line"+ index.toString()).val()
     }
 
     log_it(){
-	// just log it; 
+	$.ajax({
+	url: "http://"+api_host+":8080/api/log_interactive",
+	data: {
+	    topic:this.topic,
+	    rhyme_id:this.rhyme_id,
+	    poems:JSON.stringify(this.poems),
+	    discourage_words:JSON.stringify(this.discourage_words),
+	    hme_flags:JSON.stringify(this.hme_flags),
+	    nline:this.n,
+	    source:page_source
+	},
+	type:"GET",
+	xhrFields: {
+	    // The 'xhrFields' property sets additional fields on the XMLHttpRequest.
+	    // This can be used to set the 'withCredentials' property.
+	    // Set the value to 'true' if you'd like to pass cookies to the server.
+	    // If this is enabled, your server must respond with the header
+	    // 'Access-Control-Allow-Credentials: true'.
+	    withCredentials: false
+	},
+	success: function(response_data) {
+	    console.log(response_data)
+	}
+    }).always(function (){
+    });
     }
 
 }
@@ -46,7 +96,7 @@ function nline_onchange(n){
     
 	<button id="forward_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'forward')" data-toggle="tooltip" data-placement="top" title="by computer"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
 
-	<button id="fast_forward_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'fast_forward')" data-toggle="tooltip" data-placement="top" title="all by computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+	<button id="fast_forward_btn@@" style = "display:none" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'fast_forward')" data-toggle="tooltip" data-placement="top" title="all by computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
 
 	<button id="upload_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'upload')" data-toggle="tooltip" data-placement="top" title="by human"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span></button>
 
@@ -214,7 +264,8 @@ function rec_rhyme(){
 	data: {
 	    topic:topic,
 	    id:id,
-	    nline:total_line
+	    nline:total_line,
+	    source:page_source
 	},
 	type:"GET",
 	xhrFields: {
@@ -229,6 +280,10 @@ function rec_rhyme(){
 	    jd = $.parseJSON(response_data)
 	    rhymes = jd.rhyme_words;
 	    
+	    global_rhyme_id = jd.rhyme_id;
+
+	    poem_record = new PoemRecord(topic, global_rhyme_id, total_line);
+
 	    for (var i = 1; i < total_line+1; i++){
 		$("#rhyme"+ i.toString()).val(rhymes[i-1])
 	    }
@@ -245,7 +300,6 @@ function rec_rhyme(){
 	    g(2);
 	    display_btn(1);
 	    $("#status").html("Ready");
-
 
 	}
     }).always(function (){
@@ -319,7 +373,15 @@ function forward(index, btn_name = "forward"){ // index starts from one
     
     discourage_words = $("#discourage"+index.toString()).val();
     
-
+    var cword = -5.0;
+    var reps = 0.0;
+    var allit = 0.0;
+    var wordlen = 0.0;
+    var topical = 1.0;
+    var mono = -5;
+    var sentiment = 0;
+    var concrete = 0;
+    var discourage_weight = -5;
 
     var timer = setInterval( function() {
 	$.ajax(
@@ -343,7 +405,15 @@ function forward(index, btn_name = "forward"){ // index starts from one
 	    line:index,
 	    words:"",
 	    discourage_words:discourage_words,
-	    discourage_weight:-5,
+	    discourage_weight:discourage_weight,
+	    cword:cword,
+	    reps:reps,
+	    allit:allit,
+	    topical:topical,
+	    wordlen:wordlen,
+	    mono:mono,
+	    sentiment:sentiment,
+	    concrete:concrete,
 	    id:id
 	},
 	type:"GET",
@@ -358,6 +428,11 @@ function forward(index, btn_name = "forward"){ // index starts from one
 	    poems = jd.poem;
 	    $("#line"+index.toString()).val(poems[0])
 	    display_btn(index+1);
+	    
+	    poem_record.generate_by_machine(index);
+	    poem_record.log_it();
+
+
 	}
     }).always(function (){
 	btn.button('reset');
@@ -463,6 +538,10 @@ function upload(index){
 	    clearInterval(timer);
 	    $("#status").html("Ready");
 	    display_btn(index+1);
+
+	    poem_record.generate_by_human(index);
+	    poem_record.log_it();
+
 	}
     }).always(function (){
 	btn.button('reset');

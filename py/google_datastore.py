@@ -108,7 +108,7 @@ class GCStore:
 
 
     @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
-    def log_rhyme(self, topic_str, date, rhyme_str):
+    def log_rhyme(self, topic_str, date, rhyme_str, source = "interactive"):
         # return id
 
         with self.client.transaction():
@@ -117,11 +117,31 @@ class GCStore:
             rhyme['topic'] = topic_str
             rhyme['created_at'] = date
             rhyme['rhyme'] = rhyme_str.decode("utf8")
+            rhyme['source'] = source
 
             self.client.put(rhyme)
 
         return rhyme.key.id
         
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    def log_poem_interactive(self, topic, nline, rhyme_id, poems, discourage_words, hme_flags, date, source = "interactive"):
+        # poems json str of these things
+
+        with self.client.transaction():
+            key = self.client.key("interactive")
+            poem = datastore.Entity(key=key)
+            poem['topic'] = topic
+            poem['created_at'] = date
+            poem['rhyme_id'] = rhyme_id
+            poem['poems'] = poems
+            poem['discourage_words'] = discourage_words
+            poem['hme_flags'] = hme_flags
+            poem['nline'] = nline
+            poem['source'] = source
+
+            self.client.put(poem)
+
+        return poem.key.id
         
         
 

@@ -4,6 +4,18 @@
 <script src="{{ '/data/js/header.js' | prepend: site.baseurl }}"></script>
 
 
+{% if page.url == '/experiment_interactive/'%}
+        <script src="{{ '/data/js/poem_interactive_experiment.js' | prepend: site.baseurl }}"></script>
+        
+	<script>
+	 $(function () {
+	   $('[data-toggle="tooltip"]').tooltip()
+	 })
+	</script>
+
+{% endif %}
+
+
 
 {% if page.url == '/experiment/'%}
 	<script src="{{ '/data/js/star_experiment.js' | prepend: site.baseurl }}"></script>
