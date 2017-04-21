@@ -64,6 +64,17 @@ class GCStore:
             poem = self.client.get(key)
             poem['score'] = score
             self.client.put(poem)
+
+
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    def set_score_key(self,poem_id, score,key):
+        with self.client.transaction():
+            key = self.client.key(key,poem_id)
+            poem = self.client.get(key)
+            poem['score'] = score
+            self.client.put(poem)
+
+
         
     @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
     def log_poem(self, topic_str, date, poem_str, beam_size, time_dict, weights_dict = None):
@@ -94,6 +105,22 @@ class GCStore:
             self.client.put(poem)
 
         return poem.key.id, npoem, npoem_alexa
+
+
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    def log_rhyme(self, topic_str, date, rhyme_str):
+        # return id
+
+        with self.client.transaction():
+            key = self.client.key("rhyme")
+            rhyme = datastore.Entity(key=key)
+            rhyme['topic'] = topic_str
+            rhyme['created_at'] = date
+            rhyme['rhyme'] = rhyme_str.decode("utf8")
+
+            self.client.put(rhyme)
+
+        return rhyme.key.id
         
         
         

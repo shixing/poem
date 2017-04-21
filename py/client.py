@@ -606,6 +606,7 @@ class Rhyme(Resource):
             topic, index, nline = nline)
         d = {}
         d['rhyme_words'] = rhyme_words
+        d['rhyme_info'] = table_html
 
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
@@ -631,6 +632,39 @@ class Confirm(Resource):
         sm.clear_status(index)
 
         return r
+
+def get_rhyme_auto(topic, index=0, line_reverse=1, nline = None):
+
+    r = random.randint(1, 100000)
+    if index!=0:
+        r = index
+
+    def rf(path):
+        return '{}.{}'.format(path, r)
+
+    fsa_path = rf(fsa_path_tp)
+    source_path = rf(source_path_tp)
+    rhyme_path = rf(rhyme_path_tp)
+    encourage_path = rf(encourage_path_tp)
+
+    topic = process_topic(topic)
+    
+    cmd = ["bash", "run-different-line-numbers.sh", topic, fsa_path, source_path, rhyme_path, encourage_path, str(nline)]
+
+    print cmd
+
+    sp.call(cmd, cwd=marjan_dir)
+
+    rhyme_words, table_html = get_rhyme(rhyme_path)
+
+    sm.clear_status(index)
+
+    return [], [], rhyme_words, table_html
+
+
+
+
+
 
 def get_rhyme_interactive(topic, index, line_reverse=1, nline = None):
     def rf(path, r):
@@ -676,7 +710,7 @@ def send_receive(host, port, ins):
     return data
 
 
-def get_poem_interactive(model_type, action, index, iline, words=[], line_reverse=1):
+def get_poem_interactive(model_type, action, index, iline, words=[],encourage_path = None, encourage_weight = None,  line_reverse=1):
     # return times, poems, rhyme_words, rhyme_info_html.
     def rf(path, r):
         return '{}.{}'.format(path, r)
@@ -703,7 +737,10 @@ def get_poem_interactive(model_type, action, index, iline, words=[], line_revers
         ins = "fsa {}\n".format(fsa_path)
     elif action == "fsaline":
         fsa_path = os.path.join(interactive_folder, "fsa_line{}".format(iline - 1))
-        ins = "fsaline {}\n".format(fsa_path)
+        if encourage_path == None:
+            ins = "fsaline {}\n".format(fsa_path)
+        else:
+            ins = "fsaline {} {} {}\n".format(fsa_path,encourage_path, encourage_weight)
     elif action == "words":
         words_str = " ".join(words)
         ins = "words {}\n".format(words_str)
@@ -726,6 +763,8 @@ class POEMI(Resource):
         parser.add_argument('action')
         parser.add_argument('line')
         parser.add_argument('words')
+        parser.add_argument('discourage_words')
+        parser.add_argument('discourage_weight')
         parser.add_argument('id')
 
         args = parser.parse_args()
@@ -733,7 +772,7 @@ class POEMI(Resource):
         model_type = int(args['model'])
 
         action = args['action']
-        assert(action == "words" or action == "fsa" or action == "fsaline")
+        assert(action == "feed_history" or action == "words" or action == "fsa" or action == "fsaline")
 
         index = 'default'
         if "id" in args:
@@ -742,19 +781,58 @@ class POEMI(Resource):
         iline = int(args['line'])
         assert(iline <= 14 and iline >= 1)
 
-        words = args['words']
-        words = tokenize(words)
-
         line_reverse = 1
-        if line_reverse == 1:
-            words = words[::-1]
+        
+        poems, rhyme_words, table_html = [""],[""],""
 
-        if action == "words" and len(words) == 1 and words[0] == "":
-            words = ["<UNK>"]
+        if action == 'feed_history':
+            words_list = json.loads(args['words'])
+            for i, words in enumerate(words_list):
+                words = tokenize(words)
+                if line_reverse == 1:
+                    words = words[::-1]
 
-        print "poem_interactive", model_type, action, iline, words, index
-        times, poems, rhyme_words, table_html = get_poem_interactive(
-            model_type, action, index, iline, words)
+                if len(words) == 1 and words[0] == "":
+                    words = ["<UNK>"]
+                
+                print "poem_interactive", model_type, action, i+1, words, index
+
+                sub_action = "words"
+                _, poems, rhyme_words, table_html = get_poem_interactive(model_type, sub_action, index, i+1, words)
+
+        else:
+            words = args['words']
+            words = tokenize(words)
+
+            discourage_path = None
+            discourage_weight = 0.0
+            if 'discourage_words' in args and args['discourage_words']:
+                discourage_words = args['discourage_words']
+                discourage_words = tokenize(discourage_words)
+                
+                if len(discourage_words) == 1 and discourage_words[0] == '':
+                    pass
+                else:
+                    interactive_folder = "{}.{}".format(interactive_folder_tp, index)
+                    discourage_path = os.path.join(interactive_folder,'line_enc.txt')
+                    f = open(discourage_path,'w')
+                    for word in discourage_words:
+                        f.write(word+"\n")
+                    f.flush()
+                    f.close()
+
+            if 'discourage_weight' in args:
+                discourage_weight = args['discourage_weight']
+
+            if line_reverse == 1:
+                words = words[::-1]
+
+            if action == 'words' and len(words) == 1 and words[0] == "":
+                words = ["<UNK>"]
+
+            print "poem_interactive", model_type, action, iline, words, index
+            _, poems, rhyme_words, table_html = get_poem_interactive(
+                model_type, action, index, iline, words, encourage_path = discourage_path, encourage_weight = discourage_weight)
 
         rhyme_words_html = "<br//>".join(rhyme_words)
 
@@ -779,7 +857,6 @@ class POEMI(Resource):
         return r
 
 
-
 ################### Auto mode ####################
 class Feedback(Resource):
     def get(self):
@@ -796,6 +873,23 @@ class Feedback(Resource):
         
         r = make_response("Thanks")
         return r
+
+class Feedback_rhyme(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('rhyme_id')
+        parser.add_argument('score')
+        
+        args = parser.parse_args()
+        print args
+
+        rhyme_id = int(args['rhyme_id'])
+        score = float(args['score'])
+        my_gcstore.set_score_key(rhyme_id, score,'rhyme')
+        
+        r = make_response("Thanks")
+        return r
+
         
 class NPOEM(Resource):
     def get(self):
@@ -808,6 +902,46 @@ class NPOEM(Resource):
         json_str = json.dumps(d, ensure_ascii=False)
         r = make_response(json_str)
         return r
+
+class Rhyme_Auto(Resource):
+
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('topic')
+        parser.add_argument('id')
+        parser.add_argument('nline')
+
+        args = parser.parse_args()
+        topic = args['topic']
+        index = 'default'
+        nline = None
+        if "id" in args:
+            index = args['id']
+        if "nline" in args:
+            nline = int(args['nline'])
+
+        times, poems, rhyme_words, table_html = get_rhyme_auto(
+            topic, index, nline = nline)
+
+        rhyme_words_html = "<br//>".join(rhyme_words)
+
+        date = datetime.now()
+        rhyme_id = my_gcstore.log_rhyme(topic, date, " ".join(rhyme_words))
+
+
+        d = {}
+        d['rhyme_words'] = rhyme_words_html
+        d['rhyme_info'] = table_html[1]
+        d['rhyme_id'] = rhyme_id
+
+        json_str = json.dumps(d, ensure_ascii=False)
+        r = make_response(json_str)
+        sm.clear_status(index)
+
+        return r
+
+
+
 
 class POEM_check(Resource):
 
@@ -912,6 +1046,8 @@ class POEM_check(Resource):
 api.add_resource(POEM_check, '/api/poem_check')
 api.add_resource(NPOEM, '/api/npoem')
 api.add_resource(Feedback, '/api/feedback')
+api.add_resource(Feedback_rhyme, '/api/feedback_rhyme')
+api.add_resource(Rhyme_Auto, "/api/rhyme_auto")
 
 # for interactive model
 api.add_resource(Rhyme, "/api/rhyme")

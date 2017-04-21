@@ -5,7 +5,24 @@ var guidelines = ["Let Hafez recommend some rhyme words first","Please confirm t
 //global id;
 var gid = 0;
 var total_line = 14;
+var processed_line = 0;
 nline_onchange(4);
+
+
+class Poem {
+    constructor(rhyme_id){
+	this.hm_flags = []; // human / machine flags
+	this.poems = [];
+	this.disencourage_words = [];
+	this.rhyme_id = rhyme_id;
+    }
+
+    log_it(){
+	// just log it; 
+    }
+
+}
+
 
 function nline_onchange(n){
     total_line = n;
@@ -19,17 +36,27 @@ function nline_onchange(n){
     <div class="col-lg-2">	    
       <input type="text" class="form-control" id="rhyme@@" placeholder="Rhyme Word #@@">
     </div>
-    <div id="bs@@" style="display:none">
-      <div class="col-lg-1">
-	<button id="forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="forward(@@)" data-toggle="tooltip" data-placement="top" title="by computer"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
-      </div>
-      <div class="col-lg-1">
-	<button id="fast_forward_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="fast_forward(@@)" data-toggle="tooltip" data-placement="top" title="all by computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
-      </div>
-      <div class="col-lg-1">
-	<button id="upload_btn1" class="btn btn-default" type="button" data-loading-text="..." onclick="upload(@@)" data-toggle="tooltip" data-placement="top" title="by human"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span></button>
-      </div>
+
+    <div class="col-lg-2">	    
+      <input type="text" class="form-control" id="discourage@@" placeholder="Discourage Words #@@">
     </div>
+
+    <div class="col-lg-3">
+      <div id="bs@@" style="display:none">
+    
+	<button id="forward_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'forward')" data-toggle="tooltip" data-placement="top" title="by computer"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+
+	<button id="fast_forward_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'fast_forward')" data-toggle="tooltip" data-placement="top" title="all by computer"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+
+	<button id="upload_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'upload')" data-toggle="tooltip" data-placement="top" title="by human"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span></button>
+
+      </div>
+
+      <div id="rs@@" style="display:none">
+	<button id="repeat_btn@@" class="btn btn-default" type="button" data-loading-text="..." onclick="feed_history(@@,'repeat')" data-toggle="tooltip" data-placement="top" title="regenerate by computer"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></button>
+      </div> 
+    </div>
+	
   </div>
 `;
     temp = "";
@@ -46,32 +73,43 @@ function g(i){
 }
 
 function display_btn(index){
+    if (processed_line < index -1){
+	processed_line = index - 1;
+    }
     for (var i = 1; i < total_line+1; i++){
 	$("#bs"+ i.toString()).hide();
+	if (i <= processed_line){
+	    $("#rs"+ i.toString()).show();
+	} else {
+	    $("#rs"+ i.toString()).hide();
+	}
     }
-    $("#bs"+ index.toString()).show();
+    $("#bs"+ (processed_line+1).toString()).show();
 }
+
 
 function disable_model(disable){
     //$('input[name=model]').attr("disabled",disable);
 }
 
+
 function clear_line_rhyme(){
     for (var i = 1; i < total_line+1; i++){
 	$("#line"+ i.toString()).val("")
 	$("#rhyme"+ i.toString()).val("")
+	$("#discourage"+ i.toString()).val("")
 	$("#rhyme"+ i.toString()).prop('disabled',false);
     }
 }
 
 function start_over()
 {
+    processed_line = 0;
     clear_line_rhyme();
     g(0);
     display_btn(0);
     $("#confirm_button").prop('disabled',true);
     disable_model(false);
-
 }
 
 
@@ -217,8 +255,58 @@ function rec_rhyme(){
 
 }
 
-function forward(index){
-    var btn = $("#forward_btn"+index.toString());
+
+function feed_history(index, next_action){
+    model = 0;
+    action = "feed_history";
+    id = gid;
+    
+    words = [];
+    for (var i = 1; i < index; i++){
+	line = $("#line"+i.toString()).val();
+	words.push(line);
+    }
+    words_json = JSON.stringify(words);
+
+    var btn = $("#"+next_action+"_btn"+index.toString());
+    btn.button('loading');
+
+    $.ajax({
+	url: "http://"+api_host+":8080/api/poem_interactive",
+	data: {
+	    model:model,
+	    action:action,
+	    line:index,
+	    words:words_json,
+	    id:id
+	},
+	type:"GET",
+	xhrFields: {
+	    withCredentials: false
+	},
+	success: function(response_data) {
+	    if (next_action == "forward"){
+		forward(index);
+	    } else if (next_action == "fast_forward"){
+		fast_forward(index);
+	    } else if (next_action == "upload"){
+		upload(index);
+	    } else if (next_action == "repeat"){
+		forward(index, "repeat");
+	    }
+
+	 
+	}
+    }).fail(function (){
+	btn.button('reset');
+    });
+
+}
+
+
+function forward(index, btn_name = "forward"){ // index starts from one
+    var btn = $("#"+btn_name+"_btn"+index.toString());
+    console.log(btn_name);
     btn.button('loading');
 
     //model = $("input[name=model]:checked").val();
@@ -226,7 +314,13 @@ function forward(index){
     action = "fsaline";
 
     id = gid;
+
+    //read the discourage words here
     
+    discourage_words = $("#discourage"+index.toString()).val();
+    
+
+
     var timer = setInterval( function() {
 	$.ajax(
 	    {
@@ -248,6 +342,8 @@ function forward(index){
 	    action:action,
 	    line:index,
 	    words:"",
+	    discourage_words:discourage_words,
+	    discourage_weight:-5,
 	    id:id
 	},
 	type:"GET",
@@ -315,7 +411,7 @@ function fast_forward(index){
 	    for (var i = index; i<=total_line; i+=1){
 		$("#line"+i.toString()).val(poems[i-index]);
 	    }
-	    display_btn(0);
+	    display_btn(total_line+1);
 	}
     }).always(function (){
 	btn.button('reset');

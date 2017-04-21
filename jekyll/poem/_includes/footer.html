@@ -26,7 +26,20 @@
 
 
 {% if page.url == '/interactive/' %}
-        <script src="{{ '/data/js/poem_interactive.js' | prepend: site.baseurl }}"></script>
+        <script src="{{ '/data/js/poem_interactive_advance.js' | prepend: site.baseurl }}"></script>
+        
+	<script>
+	 $(function () {
+	   $('[data-toggle="tooltip"]').tooltip()
+	 })
+	</script>
+
+{% endif %}
+
+
+{% if page.url == '/rhyme/' %}
+	<script src="{{ '/data/js/star.js' | prepend: site.baseurl }}"></script>
+        <script src="{{ '/data/js/poem_rhyme.js' | prepend: site.baseurl }}"></script>
         
 	<script>
 	 $(function () {
