@@ -239,7 +239,7 @@ function rec_rhyme(){
 	topic = "love";
     }
 
-    id = Math.round(Math.random()*1000) + 1
+    id = Math.round(Math.random()*10000) + 1
     gid = id;
     
     //for debug

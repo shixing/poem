@@ -16,6 +16,9 @@
 4. Read the data using google_could/read.py
 
 
+#Where to change the default weight: 
+1. poem.js
+2. poem_interactive.js && poem_interactive_experiment.js (only the encourage_file related weight)
 
 
 Change log:

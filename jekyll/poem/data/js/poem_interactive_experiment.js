@@ -130,7 +130,7 @@ function generate_ticket(){
 	// do nothing
     }
     else {
-	r = Math.round(Math.random()*1000) + 2;
+	r = Math.round(Math.random()*10000) + 2;
 	ticket = 821 * r - 1;
 	$('#ticket').html("Ticket: "+ticket.toString());	
 	$('#ticket').show();
@@ -272,7 +272,7 @@ function rec_rhyme(){
 	topic = "love";
     }
 
-    id = Math.round(Math.random()*1000) + 1
+    id = Math.round(Math.random()*10000) + 1
     gid = id;
     
     //for debug
