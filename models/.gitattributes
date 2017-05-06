@@ -1,3 +1,0 @@
-lyrics.tl.nn filter=lfs diff=lfs merge=lfs -text
-lyrics.tl.topdown.nn filter=lfs diff=lfs merge=lfs -text
-lyrics.tl.nn.es filter=lfs diff=lfs merge=lfs -text

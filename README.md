@@ -10,6 +10,7 @@ For RNN with FSA decoding code, please find it [here](https://github.com/isi-nlp
 You need a server with GPU and CUDA 8.0 installed.
 
 0. Unzip the RNN model files in `models`:
+Due to the model's large size (more than 1GB), please contact shixing19910105@gmail.com for the pretrained models.
 ```
 cd models
 gunzip lyrics.tl.nn.gz
