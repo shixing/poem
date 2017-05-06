@@ -7,3 +7,4 @@
 *pyc
 
 google_cloud/datastore*
+*.gz
