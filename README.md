@@ -24,9 +24,9 @@ git clone https://github.com/Marjan-GH/Topical_poetry
 2. Follow the [instruction](https://github.com/Marjan-GH/Topical_poetry/blob/master/README.md) to start the server for `Rhyme Generation`.
 
 
-## Generate a 4-line poem from commend line
+## Generate a 4-line poem from command line
 
-In this section, we describe how to generate a four line poem from commend line.
+In this section, we describe how to generate a four line poem from command line.
 
 1. Follow the [instruction](https://github.com/Marjan-GH/Topical_poetry/blob/master/README.md) to generate related files given any topic. Here, we pre-generate all the related files about topic `Mountain`, please check `example/4line/` folder:
 
@@ -41,7 +41,7 @@ In this section, we describe how to generate a four line poem from commend line.
 cd example/4line
 bash run_standaline.sh
 ```
-It will print the commend it actually call:
+It will print the command it actually call:
 
 ```
 <ROOT_DIR>/exec/ZOPH_RNN_GPU_EXPAND --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -L 60 -b 50 --legacy-model 1 -k 1 <ROOT_DIR>/example/4line/../..//models/lyrics.tl.nn <ROOT_DIR>/example/4line/temp.txt --fsa <ROOT_DIR>/example/4line/poem.fsa --encourage-list <ROOT_DIR>/example/4line/encourage.txt --encourage-weight 1.0 --dec-ratio 0.0 100.0 --decode-main-data-files <ROOT_DIR>/example/4line/source.txt
