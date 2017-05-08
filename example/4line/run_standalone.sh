@@ -1,0 +1,14 @@
+SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ROOT_DIR=$SCRIPTDIR/../../
+MODEL=$ROOT_DIR/models/lyrics.tl.nn
+SOURCE=$SCRIPTDIR/source.txt
+FSA=$SCRIPTDIR/poem.fsa
+OUTPUT=$SCRIPTDIR/temp.txt
+ENCOURAGE=$SCRIPTDIR/encourage.txt
+BEAM_SIZE=50
+WITH_FSA=1
+PY=$ROOT_DIR/py/run_standalone.py
+
+cd $SCRIPTDIR
+
+python $PY $MODEL $SOURCE $FSA $ENCOURAGE $OUTPUT $BEAM_SIZE $WITH_FSA $SCRIPTDIR
