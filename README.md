@@ -8,7 +8,8 @@ For RNN with FSA decoding code, please find it [here](https://github.com/isi-nlp
 ## Preparation
 
 0. Unzip the RNN model files in `models`:
-Due to the model's large size (more than 1GB), please contact shixing19910105@gmail.com for the pretrained models.
+Due to the model's large size (more than 1GB), please download here: [lyrics.tl.nn.gz](https://drive.google.com/open?id=0B9mEwe4MVv7XVk9OcUhzWGg2bUU) and [lyrics.tl.topdown.nn](https://drive.google.com/open?id=0B9mEwe4MVv7XbTMyMlBZRDFWcTA)
+
 ```
 cd models
 gunzip lyrics.tl.nn.gz
@@ -85,5 +86,37 @@ cd jekyll/poem
 jekyll build
 ```
 Then the built web pages are in `jekyll/poem/_site/`
+
+## Default Hyper-parameters
+
+### For auto mode
+The server starts with: 
+```
+<ROOT_FOLDER>/exec/ZOPH_RNN_GPU_EXPAND --interactive 1 --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -b 50 -L 160 --decode-main-data-files <ROOT_FOLDER>/models/source.fake.txt -k 1 <ROOT_FOLDER>/models/lyrics.tl.nn <ROOT_FOLDER>/run/kbest10010.txt --fsa <ROOT_FOLDER>/models/fsa.fake.txt --print-beam 1 --dec-ratio 0.0 100.0 --encourage-list dummy --encourage-weight 1.0 --legacy-model 1
+```
+and the client communicate with:
+```
+k:1 source_file:<ROOT_FOLDER>/fsas/source.txt fsa_file:<ROOT_FOLDER>/fsas/poem.fsa encourage_list_files:<ROOT_FOLDER>/fsas/encourage.txt,<ROOT_FOLDER>/models/curse.txt,<ROOT_FOLDER>/models/mono.txt encourage_weights:1.0,-5.0,-5.0 repetition:0.0 alliteration:0.0 wordlen:0.0
+```
+
+### For ensemble mode
+The server starts with:
+```
+<ROOT_FOLDER>/exec/ZOPH_RNN_GPU_EXPAND --interactive 1 --interactive-line 1 --adjacent-repeat-penalty -2.0 --repeat-penalty -3.0 -b 50 -L 160 --decode-main-data-files <ROOT_FOLDER>/models/source.fake.txt <ROOT_FOLDER>/models/source.fake.txt -k 1 <ROOT_FOLDER>/models/lyrics.tl.topdown.nn <ROOT_FOLDER>/models/lyrics.tl.nn <ROOT_FOLDER>/run/kbest10010.txt --fsa <ROOT_FOLDER>/models/fsa.fake.txt --print-beam 1 --dec-ratio 0.0 100.0 --encourage-list dummy --encourage-weight 1.0 --legacy-model 1
+```
+and the client communicate with:
+
+```
+source <source_file>
+```
+```
+words_ensemble word11 word12 word13 ___sep___ word21 word22 word23 ___sep___
+```
+```
+fsaline <fsa_file> encourage_list_files:<ROOT_FOLDER>/fsas/encourage.txt,<ROOT_FOLDER>/models/curse.txt,<ROOT_FOLDER>/models/mono.txt encourage_weights:1.0,-5.0,-5.0 repetition:0.0 alliteration:0.0 wordlen:0.0
+```
+
+
+
 
 Any questions, please contact [Xing Shi](mailto:shixing19910105@gmail.com)
