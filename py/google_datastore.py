@@ -8,7 +8,7 @@ class GCStore:
     def __init__(self):
         self.client = datastore.Client()
     
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def get_npoem(self):
         key = self.client.key("counter",'npoem')
         counter = self.client.get(key)
@@ -19,7 +19,7 @@ class GCStore:
             self.client.put(counter)
         return counter['value']
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def get_npoem_key(self,counter_key):
         key = self.client.key("counter",counter_key)
         counter = self.client.get(key)
@@ -31,7 +31,7 @@ class GCStore:
         return counter['value']
 
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def increase_npoem(self):
         value = -1
         key = self.client.key("counter",'npoem')
@@ -44,7 +44,7 @@ class GCStore:
         return value
 
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def increase_npoem_key(self,counter_key):
         value = -1
         key = self.client.key("counter",counter_key)
@@ -57,7 +57,7 @@ class GCStore:
         return value
 
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def set_score(self,poem_id, score):
         with self.client.transaction():
             key = self.client.key("poem",poem_id)
@@ -66,7 +66,7 @@ class GCStore:
             self.client.put(poem)
 
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def set_score_key(self,poem_id, score,key):
         with self.client.transaction():
             key = self.client.key(key,poem_id)
@@ -76,7 +76,7 @@ class GCStore:
 
 
         
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def log_poem(self, topic_str, date, poem_str, beam_size, time_dict, weights_dict = None):
         # return id
         npoem = self.increase_npoem()
@@ -107,7 +107,7 @@ class GCStore:
         return poem.key.id, npoem, npoem_alexa
 
 
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def log_rhyme(self, topic_str, date, rhyme_str, source = "interactive"):
         # return id
 
@@ -123,7 +123,7 @@ class GCStore:
 
         return rhyme.key.id
         
-    @retry(wait_exponential_multiplier=100, wait_exponential_max=2000)
+    @retry(wait_exponential_multiplier=500, wait_exponential_max=8000)
     def log_poem_interactive(self, topic, nline, rhyme_id, poems, discourage_words, hme_flags, date, source = "interactive"):
         # poems json str of these things
 

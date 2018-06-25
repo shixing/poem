@@ -8,12 +8,12 @@ For RNN with FSA decoding code, please find it [here](https://github.com/isi-nlp
 ## Preparation
 
 0. Unzip the RNN model files in `models`:
-Due to the model's large size (more than 1GB), please download here: [lyrics.tl.nn.gz](https://drive.google.com/open?id=0B9mEwe4MVv7XVk9OcUhzWGg2bUU) and [lyrics.tl.topdown.nn](https://drive.google.com/open?id=0B9mEwe4MVv7XbTMyMlBZRDFWcTA)
+Due to the model's large size (more than 1GB), please download here: [lyrics.tl.nn.gz](https://drive.google.com/open?id=0B9mEwe4MVv7XVk9OcUhzWGg2bUU) and [lyrics.tl.topdown.nn.gz](https://drive.google.com/open?id=0B9mEwe4MVv7XbTMyMlBZRDFWcTA)
 
 ```
 cd models
 gunzip lyrics.tl.nn.gz
-gunzip lyrics.tl.topdown.nn
+gunzip lyrics.tl.topdown.nn.gz
 ```
 1. Copy the rhyme generation code into the folder `sonnet-project-for-server/`
 

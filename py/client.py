@@ -15,7 +15,7 @@ import random
 from google_datastore import GCStore
 import unicodedata
 
-host = "vivaldi.isi.edu"
+host = "localhost"
 ports = [10010]
 size = 10240
 

@@ -1,1 +1,5 @@
 exec/ZOPH_RNN_GPU_EXPAND filter=lfs diff=lfs merge=lfs -text
+models/lyrics.tl.nn.gz filter=lfs diff=lfs merge=lfs -text
+models/lyrics.tl.topdown.nn.gz filter=lfs diff=lfs merge=lfs -text
+sonnet-project-for-server/data/distance_all filter=lfs diff=lfs merge=lfs -text
+sonnet-project-for-server/data/vectors-phrase-40-small.bin filter=lfs diff=lfs merge=lfs -text

@@ -35,6 +35,7 @@ function highlight_rhyme(poem, rhyme){
     lines = remove_empty(poem.split("<br//>"));
     rhymes = remove_empty(rhyme.split("<br//>"));
     new_poem = "";
+    console.log(rhymes)
     for (i = 0; i < rhymes.length; i += 1){
 	line = lines[i].trim()
 	words = rhymes[i]
@@ -241,7 +242,8 @@ $('#adjust-button').click(function() {
 	    $("#poem_id").html(jd.poem_id);
 	
 
-	    $("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
+	    //$("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
+	    $("#poem").html(jd.poem);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
@@ -403,7 +405,8 @@ $('#translate-button').click(function() {
 	    $("#npoem").html(jd.n_poem);
 	    $("#npoem_alexa").html(jd.n_poem_alexa);
 	    $("#poem_id").html(jd.poem_id);
-	    $("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
+	    //$("#poem").html(highlight_rhyme(jd.poem,jd.rhyme_words));
+	    $("#poem").html(jd.poem);
 	    $("#config").html(jd.config);
 	    $("#rhyme-info").html(jd.rhyme_info);
 	    $("#rhyme-words").html(jd.rhyme_words);
