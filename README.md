@@ -116,6 +116,11 @@ words_ensemble word11 word12 word13 ___sep___ word21 word22 word23 ___sep___
 fsaline <fsa_file> encourage_list_files:<ROOT_FOLDER>/fsas/encourage.txt,<ROOT_FOLDER>/models/curse.txt,<ROOT_FOLDER>/models/mono.txt encourage_weights:1.0,-5.0,-5.0 repetition:0.0 alliteration:0.0 wordlen:0.0
 ```
 
+## Run by Docker
+
+### Preparation:
+
+1. Install `[nvidia_docker](https://github.com/NVIDIA/nvidia-docker)` 
 
 
 
