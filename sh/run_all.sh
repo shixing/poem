@@ -2,7 +2,7 @@
 
 if ! echo "TEST" | nc localhost 10010; then
     cd ./;
-    bash run_server.sh &;
+    bash run_server.sh &
     while ! echo "TEST" | nc localhost 10010; 
     do
 	sleep 10;
@@ -12,7 +12,7 @@ fi;
 
 if ! echo "HAFEZ:CONNECT" | nc localhost 50001; then
     cd ./;
-    bash initial_server_1.sh &;
+    bash initial_server_1.sh &
     while ! echo "HAFEZ:CONNECT" | nc localhost 50001; 
     do
 	sleep 3;
@@ -22,7 +22,7 @@ fi;
 
 if ! echo "HAFEZ:CONNECT" | nc localhost 50002; then
     cd ./;
-    bash initial_server_2.sh &;
+    bash initial_server_2.sh &
     while ! echo "HAFEZ:CONNECT" | nc localhost 50002; 
     do
 	sleep 3;
@@ -32,7 +32,7 @@ fi;
 
 if ! echo "HAFEZ:CONNECT" | nc localhost 50003; then
     cd ./;
-    bash initial_server_3.sh &;
+    bash initial_server_3.sh &
     while ! echo "HAFEZ:CONNECT" | nc localhost 50003; 
     do
 	sleep 3;

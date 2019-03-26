@@ -1,7 +1,7 @@
 // the translate button
 gmodel="";
 gtopic="";
-api_host = "vivaldi.isi.edu"
+api_host = window.location.hostname
 
 $('#translate-button').click(function() {
 

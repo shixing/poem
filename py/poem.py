@@ -7,7 +7,7 @@ import subprocess as sp
 class Server:
 
     def __init__(self,port, model = 0, beam_size = 10, legacy_model = 1):
-        self.host = socket.gethostname()
+        self.host = 'localhost' #socket.gethostname()
         self.port = port
         self.model = model
         self.root_dir = os.path.abspath(__file__ + "/../../")

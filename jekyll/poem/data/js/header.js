@@ -1,4 +1,4 @@
-api_host = "vivaldi.isi.edu"
+api_host = window.location.hostname
 
 function update_npoem(){
     $.ajax({

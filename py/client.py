@@ -7,12 +7,12 @@ import stat
 
 
 from flask import Flask
-from flask.ext.restful import reqparse, abort, Api, Resource
+from flask_restful import reqparse, abort, Api, Resource
 from flask import request, make_response
 from datetime import datetime
 from nltk import word_tokenize
 import random
-from google_datastore import GCStore
+#from google_datastore import GCStore
 import unicodedata
 
 host = "localhost"
@@ -43,7 +43,7 @@ log_path = os.path.join(root_dir,"log/log.txt")
 interactive_folder_tp = os.path.join(root_dir, 'fsas_interactive/data')
 interactive_folder = interactive_folder_tp
 
-my_gcstore = GCStore()
+#my_gcstore = GCStore()
 
 ################# Plagiarism Check ################# 
 
@@ -1006,8 +1006,10 @@ class Feedback_rhyme(Resource):
         
 class NPOEM(Resource):
     def get(self):
-        n = my_gcstore.get_npoem()
-        n_alexa = my_gcstore.get_npoem_key("alexa")
+        #n = my_gcstore.get_npoem()
+        #n_alexa = my_gcstore.get_npoem_key("alexa")
+        n = 0
+        n = 0
         d = {}
         d['value'] = n
         d['value_alexa'] = n_alexa
@@ -1120,7 +1122,8 @@ class POEM_check(Resource):
         
         # log it
         if model_type >= 0:
-            poem_id, n_poem, n_poem_alexa = log_it(beams[model_type],topic,poems,times,weights = args)
+            poem_id, n_poem, n_poem_alexa = random.randint(0,100000), 0, 0
+            #poem_id, n_poem, n_poem_alexa = log_it(beams[model_type],topic,poems,times,weights = args)
             print poem_id, n_poem, n_poem_alexa
 
         phrases = []
@@ -1158,16 +1161,16 @@ class POEM_check(Resource):
 ################### Add Endpoint ####################
 api.add_resource(POEM_check, '/api/poem_check')
 api.add_resource(NPOEM, '/api/npoem')
-api.add_resource(Feedback, '/api/feedback')
-api.add_resource(Feedback_rhyme, '/api/feedback_rhyme')
-api.add_resource(Rhyme_Auto, "/api/rhyme_auto")
+#api.add_resource(Feedback, '/api/feedback')
+#api.add_resource(Feedback_rhyme, '/api/feedback_rhyme')
+#api.add_resource(Rhyme_Auto, "/api/rhyme_auto")
 
 # for interactive model
-api.add_resource(Rhyme, "/api/rhyme")
-api.add_resource(Confirm, "/api/confirm")
+#api.add_resource(Rhyme, "/api/rhyme")
+#api.add_resource(Confirm, "/api/confirm")
 api.add_resource(Status, '/api/poem_status')
-api.add_resource(POEMI, '/api/poem_interactive')
-api.add_resource(LogI, '/api/log_interactive')
+#api.add_resource(POEMI, '/api/poem_interactive')
+#api.add_resource(LogI, '/api/log_interactive')
 
 
 
@@ -1176,4 +1179,4 @@ api.add_resource(LogI, '/api/log_interactive')
 if __name__ == '__main__':
     # read_from_stdin()
     app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.run(threaded=True, debug=True, host='vivaldi.isi.edu', port=8080)
+    app.run(threaded=True, debug=True, host='0.0.0.0', port=8080)
