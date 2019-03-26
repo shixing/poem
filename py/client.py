@@ -1009,7 +1009,7 @@ class NPOEM(Resource):
         #n = my_gcstore.get_npoem()
         #n_alexa = my_gcstore.get_npoem_key("alexa")
         n = 0
-        n = 0
+        n_alexa = 0
         d = {}
         d['value'] = n
         d['value_alexa'] = n_alexa
