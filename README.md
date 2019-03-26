@@ -122,6 +122,63 @@ fsaline <fsa_file> encourage_list_files:<ROOT_FOLDER>/fsas/encourage.txt,<ROOT_F
 
 1. Install `[nvidia_docker](https://github.com/NVIDIA/nvidia-docker)` 
 
+2. Start the docker:
+
+```
+sudo docker run --runtime=nvidia --network="host" shixing19910105/poem:1.0 /bin/bash -c 'cd /home/poem/sh/ && bash run_all_docker.sh'
+```
+
+Then you will see message like the following: 
+
+```
+Poem Client loaded
+localhost [127.0.0.1] 10010 (?) : Connection refused
+/usr/bin/python
+localhost [127.0.0.1] 10010 (?) : Connection refused
+ * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 229-279-491
+localhost [127.0.0.1] 10010 (?) : Connection refused
+localhost [127.0.0.1] 10010 (?) : Connection refused
+Accept----------------------------source kbest file info-----------------------------
+Number of source word tokens: 0
+Number of source segment pairs (lines in training file): 0
+Longest source segment (after removing long sentences for training): 0
+Total word tokens thrown out due to sentence cutoff: 0
+-------------------------------------------------------------------------------
+
+Poem Server loaded and listen on localhost:10010
+localhost [127.0.0.1] 50001 (?) : Connection refused
+localhost [127.0.0.1] 50001 (?) : Connection refused
+ready to operate ....
+Rhyme Server 1 loaded and listen on localhost:50001
+localhost [127.0.0.1] 50002 (?) : Connection refused
+localhost [127.0.0.1] 50002 (?) : Connection refused
+37842
+ready to operate ....
+Out of dictionary word!
+data/related_words_3029Rhyme Server 2 loaded and listen on localhost:50002
+localhost [127.0.0.1] 50003 (?) : Connection refused
+localhost [127.0.0.1] 50003 (?) : Connection refused
+37851
+1644534
+ready to operate ....
+pid0
+17
+data/rhyme_file_6806Rhyme Server 3 loaded and listen on localhost:50003
+Configuration file: /home/poem/jekyll/poem/_config.yml
+            Source: /home/poem/jekyll/poem
+       Destination: /home/poem/jekyll/poem/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+                    done in 0.221 seconds.
+ Auto-regeneration: enabled for '/home/poem/jekyll/poem'
+    Server address: http://0.0.0.0:4000/poem//
+  Server running... press ctrl-c to stop.
+```
+
+3. Open your browser, access the website through `http://<YOUR_SERVER_IP>:4000/poem/`
 
 
 Any questions, please contact [Xing Shi](mailto:shixing19910105@gmail.com)
