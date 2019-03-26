@@ -6,3 +6,5 @@ g++ -std=c++0x -o find_rhyme_words_server find_rhyme_words_server.cpp
 g++ -std=c++0x -o phrase_to_accepted_phrases_server phrase_to_accepted_phrases_server.cpp 
 g++ -o reorder_rhymes reorder_rhymes.cpp 
 g++ -o make_complete_fsa_with_rhyme-different_line_number make_complete_fsa_with_rhyme-different_line_number.cpp
+g++ -o captalize captalize.cpp
+g++ -o remove_first_one_syll_words remove_first_one_syll_words.cpp
