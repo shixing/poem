@@ -46,7 +46,7 @@ class Server:
             sys.exit()
         print 'Socket bind complete'
  
-        s.listen(0)
+        s.listen(5)
         print 'Socket now listening on {}:{}'.format(self.host, self.port)
 
         while True:
