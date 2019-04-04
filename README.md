@@ -125,7 +125,7 @@ fsaline <fsa_file> encourage_list_files:<ROOT_FOLDER>/fsas/encourage.txt,<ROOT_F
 2. Start the docker:
 
 ```
-sudo docker run --runtime=nvidia --network="host" shixing19910105/poem:1.0 /bin/bash -c 'cd /home/poem/sh/ && bash run_all_docker.sh'
+sudo docker run --runtime=nvidia -p 4000:4000 -p 8080:8080 shixing19910105/poem:1.0 /bin/bash -c 'cd /home/poem/sh/ && bash run_all_docker.sh'
 ```
 
 Then you will see message like the following: 
